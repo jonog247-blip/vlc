@@ -107,6 +107,7 @@ endif
 
 EXTRA_DIST += \
 	$(skins2_default_vlt_FILES) \
+	$(skins2_vlcnext_vlt_FILES) \
 	$(DIST_icons) \
 	$(DIST_http_lua) \
 	$(DIST_solid)
@@ -115,7 +116,7 @@ nobase_pkgdata_DATA =
 nobase_pkglibexec_SCRIPTS =
 nobase_dist_pkgdata_DATA =
 if BUILD_SKINS
-nobase_pkgdata_DATA += skins2/default.vlt
+nobase_pkgdata_DATA += skins2/default.vlt skins2/vlcnext.vlt
 nobase_dist_pkgdata_DATA += $(DIST_skins2)
 endif
 if KDE_SOLID
@@ -144,6 +145,20 @@ skins2_default_vlt_FILES = \
 	skins2/default/subX/vol_anim.png \
 	skins2/default/subX/vol_slider.png
 
+skins2_vlcnext_vlt_FILES = \
+	skins2/vlcnext/theme.xml \
+	skins2/vlcnext/vlcnext/FreeSans.ttf \
+	skins2/vlcnext/vlcnext/FreeSansBold.ttf \
+	skins2/vlcnext/vlcnext/icons.png \
+	skins2/vlcnext/vlcnext/next.png \
+	skins2/vlcnext/vlcnext/pause.png \
+	skins2/vlcnext/vlcnext/play.png \
+	skins2/vlcnext/vlcnext/prev.png \
+	skins2/vlcnext/vlcnext/seek_strip.png \
+	skins2/vlcnext/vlcnext/seek_strip_fsc.png \
+	skins2/vlcnext/vlcnext/ui.png \
+	skins2/vlcnext/vlcnext/vol_strip.png
+
 skins2/default.vlt: $(skins2_default_vlt_FILES)
 	$(AM_V_at)$(MKDIR_P) "skins2"
 	$(AM_V_at)rm -f -- skins2/default.vlt.tmp
@@ -155,6 +170,18 @@ skins2/default.vlt: $(skins2_default_vlt_FILES)
 		$$tarowner --directory="$(srcdir)/skins2" \
 		$$(cd "$(srcdir)/skins2" && find default/ -type f | LC_ALL=C sort)
 	$(AM_V_at)mv -f -- skins2/default.vlt.tmp skins2/default.vlt
+
+skins2/vlcnext.vlt: $(skins2_vlcnext_vlt_FILES)
+	$(AM_V_at)$(MKDIR_P) "skins2"
+	$(AM_V_at)rm -f -- skins2/vlcnext.vlt.tmp
+	$(AM_V_GEN)tarowner="--owner=root --group=root"; \
+	if test "`uname -s`" = "Darwin"; then tarowner=""; fi; \
+	GZIP=--no-name \
+	tar cvvzf skins2/vlcnext.vlt.tmp \
+		--format=ustar $$tarsort \
+		$$tarowner --directory="$(srcdir)/skins2/vlcnext" \
+		theme.xml vlcnext
+	$(AM_V_at)mv -f -- skins2/vlcnext.vlt.tmp skins2/vlcnext.vlt
 
 #
 # LUA
