@@ -33,7 +33,7 @@ skins2 is built into VLC 3.x and is still built by this tree
 | §1.3 | Two-tone cone mark, monochrome off-white `#E0E0E0` icon set, orange for active toggles | `tools/art.py` |
 | §2.1 | Video canvas + top bar + two row control bar | layout `normal` |
 | §2.2 | Unified `···` menu replacing the whole menu bar, folder breadcrumb, technical readout, window controls | `PopupMenu id="main_menu"` |
-| §2.3 | Left aligned `[prev][play pill][next]`, elapsed/total time, seek bar, live `85%` readout, cone/wedge volume slider (green → yellow → red), track flyout, settings, queue, fullscreen | layout `normal` |
+| §2.3 | Left aligned `[prev][play pill][next]`, elapsed/total time, seek bar, live `85%` readout, cone/wedge volume slider (green → yellow → red), track flyout, audio drawer, queue drawer, fullscreen | layout `normal` |
 | §2.4 | Seek bar with a filled progress track and a scrub handle | `seek.strip` sprite sheet |
 | §3.3 | Audio drawer: equalizer on/off, preamp and all 10 bands, bitrate / sample rate | layout `sidebar_audio` |
 | §3.4 | Queue drawer: live playlist, add / remove / sort | layout `sidebar_queue` |
@@ -51,7 +51,8 @@ right edge.
 
 Extras that come free with skins2: window resizing and drag by the bars,
 album art behind the video, tooltips on every control, and VLC's own
-preferences / open / playlist dialogs behind the gear button.
+preferences / open / playlist dialogs behind the `···` menu (the gear opens
+the audio drawer, as in `§2.3`).
 
 
 ## What skins2 cannot do

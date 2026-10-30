@@ -199,7 +199,7 @@ ICON_GLYPH = 18
 ICON_BUTTONS = [
     # key              kind        glyph
     ("tracks", "button", "bubble"),
-    ("gear", "button", "gear"),
+    ("gear", "checkbox", "gear"),
     ("queue", "checkbox", "queue"),
     ("fullscreen", "button", "fullscreen"),
     ("mute", "checkbox", "speaker"),

@@ -547,11 +547,20 @@ def control_bar(W, H, seek_w, layout_id, strip="seek.strip"):
                    W - D.D_TRACKS, y2,
                    lefttop="righttop", rightbottom="righttop",
                    tooltiptext="Tracks"))
-    p.child(Button("btn.prefs", "icons.gear.normal", "icons.gear.down",
-                   "icons.gear.over", "dialogs.prefs()",
-                   W - D.D_GEAR, y2,
-                   lefttop="righttop", rightbottom="righttop",
-                   tooltiptext="Settings"))
+    # the gear opens the audio / equalizer drawer (section 2.3, control 7);
+    # VLC's own preferences stay reachable from the "..." menu
+    p.child(Checkbox("btn.prefs",
+                     "icons.gear.on.normal", "icons.gear.on.down",
+                     "icons.gear.on.over",
+                     "icons.gear.normal", "icons.gear.down",
+                     "icons.gear.over",
+                     "sidebar_audio.isActive",
+                     "main.setLayout(normal)",
+                     "main.setLayout(sidebar_audio)",
+                     W - D.D_GEAR, y2,
+                     lefttop="righttop", rightbottom="righttop",
+                     tooltiptext1="Hide the audio panel",
+                     tooltiptext2="Audio and equalizer"))
     p.child(Checkbox("btn.queue",
                      "icons.queue.on.normal", "icons.queue.on.down",
                      "icons.queue.on.over",
