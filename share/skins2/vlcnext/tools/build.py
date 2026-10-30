@@ -762,6 +762,40 @@ def resize_grips(W, H):
     return out
 
 
+def uniquify(el):
+    """Make every control id inside a layout unique across the whole theme.
+
+    skins2 stores controls in one map per theme (Theme::m_controls) keyed by
+    id, while layouts keep *raw* pointers to their controls.  Reusing an id
+    (e.g. the same "seek" in the normal layout and in the two drawer layouts)
+    makes the builder replace the map entry, which destroys the first control
+    and leaves that layout with a dangling pointer: the widget then draws
+    nothing, draws stale pixels or ignores clicks -- and the effect depends on
+    allocation order, so it changes from build to build.  Prefixing with the
+    layout id keeps every id unique and every pointer valid.
+    """
+    if el.tag == "Window":
+        # a window only contains layouts: each one is uniquified with its own
+        # id (layout ids must stay stable, they are referenced by
+        # <window>.setLayout() and stored in vlcrc to restore the geometry)
+        for child in el.children:
+            uniquify(child)
+        return el
+
+    lid = el.attrs["id"]
+
+    def prefix(node):
+        for c in node.children:
+            if c.tag in ("Layout", "Window"):
+                continue
+            if "id" in c.attrs:
+                c.attrs["id"] = "%s.%s" % (lid, c.attrs["id"])
+            prefix(c)
+
+    prefix(el)
+    return el
+
+
 def layout(ident, W, H, drawer_kind=None, resizable=True):
     el = El("Layout", id=ident, width=W, height=H)
     if resizable:
@@ -948,15 +982,16 @@ def main():
     out.append(popup_menu("main_menu", D.MAIN_MENU).render(2))
     out.append(popup_menu("tracks_menu", D.TRACKS_MENU).render(2))
     out.append("")
-    out.append('  <Window id="main" visible="true" x="140" y="90">')
-    out.append(layout("normal", D.MAIN_W, D.MAIN_H).render(4))
-    out.append(layout("sidebar_queue", D.MAIN_W, D.MAIN_H,
-                      drawer_kind="queue").render(4))
-    out.append(layout("sidebar_audio", D.MAIN_W, D.MAIN_H,
-                      drawer_kind="audio").render(4))
+    out.append('  <Window id="main" visible="true" x="320" y="140">')
+    out.append(uniquify(layout("normal", D.MAIN_W,
+                                   D.MAIN_H)).render(4))
+    out.append(uniquify(layout("sidebar_queue", D.MAIN_W, D.MAIN_H,
+                                   drawer_kind="queue")).render(4))
+    out.append(uniquify(layout("sidebar_audio", D.MAIN_W, D.MAIN_H,
+                                   drawer_kind="audio")).render(4))
     out.append("  </Window>")
-    out.append(mini_window(seek_w).render(2))
-    out.append(fsc_window().render(2))
+    out.append(uniquify(mini_window(seek_w)).render(2))
+    out.append(uniquify(fsc_window()).render(2))
     out.append("</Theme>")
 
     theme_path = os.path.join(SKIN, "theme.xml")

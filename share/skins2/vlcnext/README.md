@@ -54,6 +54,29 @@ album art behind the video, tooltips on every control, and VLC's own
 preferences / open / playlist dialogs behind the `···` menu (the gear opens
 the audio drawer, as in `§2.3`).
 
+### Window size and 4K screens
+
+The window opens at **1280×800**, centred for a 1920×1080 desktop
+(`<Window id="main" x="320" y="140">`), and every layout is freely resizable:
+
+```
+min 1000×520   max unbounded   default 1280×800
+```
+
+Everything is anchored, so the header, the control bar, the seek bar, the
+drawers and the resize grips follow the window edge at any size — up to 4K and
+beyond. The size you drag the window to is stored by VLC in `skins2-config`
+and reused on the next start.
+
+skins2 has **no screen query and no DPI awareness**: a theme cannot ask how
+big the desktop is or how the compositor scales it, and the bitmaps are blitted
+1:1 in physical pixels. That is why the default is a compromise between a
+1080p laptop and a 4K desktop rather than a proportional size, and why on a 4K
+panel (or on a HiDPI display scaled below 100%) the window has to be dragged
+open once — VLC then remembers it. If a stale `skins2-config` entry ever wins
+(e.g. after the layout ids changed between versions) VLC falls back to the
+default above.
+
 
 ## What skins2 cannot do
 
@@ -67,6 +90,9 @@ reached from a `.vlt` file:
   handles, which is how the window is moved.
 * Clicking the folder breadcrumb to walk up a directory (`§2.2`) — there is no
   library in skins2, so it opens VLC's playlist instead.
+* Screen-relative window sizing (`§4.1` "responsive up to 4K") — a skin
+  cannot query the screen size or the DPI, so the window opens at a fixed
+  default size and is resized by hand (VLC remembers it).
 * Elapsed ⇄ remaining time toggle on click (`§2.3`) — `$T` / `$D` are fixed
   macros and no command switches them; both are shown at once instead.
 * The centre title of the header (`§2.2`) — skins2 has no way to ellipsize or
@@ -85,6 +111,35 @@ reached from a `.vlt` file:
 
 Everything above would be a change to `modules/gui/skins2` (C++) or to the Qt
 interface (`modules/gui/qt`), which needs a full VLC build.
+
+
+## Seek bar accuracy (a one-file engine fix, shipped in this tree)
+
+The seek bar is driven by the `time` variable, i.e. by the *position* VLC's
+demuxer reports (`DEMUX_GET_POSITION`).  VLC computes that as
+`i_pcr / i_duration`, which is only meaningful when the container starts at
+timestamp 0.  For files that start far from zero (many MKVs, remuxes,
+broadcast captures) a stream that has just started reports a position close to
+1.0: the bar shows "nearly finished", and a click seeks with the same skewed
+scale, so scrubbing appears not to work either.  The elapsed/duration readouts
+next to the bar (`$T`/`$D`) query the player directly and are correct, which is
+why the two disagree.
+
+`modules/gui/skins2` now derives the variable from the player's own time and
+length, and seeks by time:
+
+* `src/vlcproc.cpp` — `VlcProc::on_position_changed()` recomputes the position
+  as `vlc_player_GetTime() / vlc_player_GetLength()` instead of trusting the
+  value handed over by the demuxer;
+* `vars/time.cpp` — `StreamTime::set()` seeks with `vlc_player_SetTime(pct *
+  length)`, falling back to `vlc_player_SetPosition()` when the length is
+  unknown (live streams).
+
+This fixes the slider, the scrub target and the "at the end when just
+starting" symptom for **every** skins2 theme, not just this one.  It is a
+change to `modules/gui/skins2`, so it only takes effect in a VLC built from
+this tree; a stock VLC binary fed this `.vlt` still gets the old (demux)
+position and can therefore show an early "full" bar on such files.
 
 
 ## Rebuilding
@@ -145,7 +200,16 @@ Editing workflow:
    absorbed the width delta. An anchor that is wrong is invisible at the
    design size and only shows up when the user drags the window corner — this
    is what caught the queue list and its footer buttons not following the
-   bottom of the drawer.
+   bottom of the drawer;
+10. asserts that **every control id is unique across the whole theme**, not
+   just inside one layout.  skins2 keeps controls in one map keyed by id while
+   each layout keeps *raw* pointers to them, so two layouts sharing an id (the
+   same `seek` in `normal` and in both drawers) makes the builder destroy the
+   first control and leave that layout pointing at freed memory — the widget
+   then paints nothing, paints stale pixels or eats clicks, depending on
+   allocation order.  Control ids are therefore prefixed with their layout id
+   (`normal.seek`, `sidebar_audio.volume`, `fsc.fsc.seek`) by
+   `tools/build.py`, and this check keeps them that way.
 
 ## Files
 

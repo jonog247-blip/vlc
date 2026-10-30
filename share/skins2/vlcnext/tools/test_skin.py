@@ -570,19 +570,38 @@ def overlaps(r1, r2, slack=0):
 
 
 def check_ids(theme, report):
+    """Control ids must be unique across the whole theme, not just per layout.
+
+    skins2 stores controls in a single map per theme (Theme::m_controls) keyed
+    by id, while every layout keeps *raw* pointers to its controls.  If two
+    layouts reuse an id the builder replaces the map entry, which destroys the
+    first control and leaves that layout pointing at freed memory: the widget
+    then paints nothing, paints stale pixels or ignores clicks, depending on
+    what happened to be allocated in its place.  Reusing an id inside one
+    layout is caught here too.
+    """
     seen = {}
+    layouts = 0
     for layout, node in theme.all_nodes():
         ident = node.id
         if not ident or ident == "none":
             continue
-        key = (layout.attrs["id"], ident)
-        if key in seen:
-            report.error("duplicate id %r in layout %s"
-                         % (ident, layout.attrs["id"]))
-        seen[key] = node
+        lid = layout.attrs["id"]
+        if lid not in seen.setdefault("__layouts__", set()):
+            seen["__layouts__"].add(lid)
+            layouts += 1
+        if ident in seen:
+            other = seen[ident][0].attrs["id"]
+            report.error("control id %r is used in both layout %s and %s: "
+                         "skins2 would delete the first control and leave a "
+                         "dangling pointer" % (ident, other, lid))
+        seen[ident] = (layout, node)
+    seen.pop("__layouts__", None)
     for ident in theme.bitmaps:
         if ident in seen:
             report.error("bitmap id %r collides with a control id" % ident)
+    report.note("control ids: %d unique across %d layouts"
+                % (len(seen), layouts))
 
 
 def check_artwork(theme, report):
@@ -861,7 +880,10 @@ def render_layout(theme, wid, layout, resize=(0, 0)):
             return
         cw = max(p[0] for p in pts) + 1
         ch = max(p[1] for p in pts) + 1
-        value = SLIDER_VALUE.get(node.id, 0.5)
+        # control ids are prefixed with their layout id ("normal.seek"), so
+        # fall back to the unprefixed name for the sample values
+        value = SLIDER_VALUE.get(node.id,
+                                 SLIDER_VALUE.get(node.id.split(".", 1)[-1], 0.5))
         bg = None
         for c in getattr(node, "raw_children", []):
             if c.tag == "SliderBackground":
@@ -1081,11 +1103,11 @@ def check_render(theme, report):
         ("seek bar fill is accent orange before the playhead",
          pixel_is(normal, D.SEEK_X + 120, bar_y + D.ROW1_CY, D.ACCENT)),
         ("seek bar is unfilled after the playhead",
-         pixel_is(normal, D.SEEK_X + 600, bar_y + D.ROW1_CY, D.BG_SURFACE)),
+         pixel_is(normal, D.SEEK_X + D.SEEK_W - 40, bar_y + D.ROW1_CY, D.BG_SURFACE)),
         ("seek bar shows a handle at the playhead",
-         region_has(normal, (int(D.SEEK_X + 733 * SLIDER_VALUE["seek"]) - 9,
+         region_has(normal, (int(D.SEEK_X + D.SEEK_W * SLIDER_VALUE["seek"]) - 9,
                              bar_y + D.ROW1_CY - 8,
-                             int(D.SEEK_X + 733 * SLIDER_VALUE["seek"]) + 9,
+                             int(D.SEEK_X + D.SEEK_W * SLIDER_VALUE["seek"]) + 9,
                              bar_y + D.ROW1_CY + 8), D.TEXT_PRIMARY)),
         ("cone volume is green under 100%",
          region_has(normal, (W - D.VOL_SLIDER_D, bar_y + D.ROW2_CY - 8,

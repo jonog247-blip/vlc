@@ -197,235 +197,235 @@
     <MenuItem action="vlc.fullscreen()" label="Toggle Fullscreen"/>
   </PopupMenu>
 
-  <Window id="main" visible="true" x="140" y="90">
-    <Layout id="normal" width="1100" height="680" minwidth="1000" maxwidth="99999" minheight="520" maxheight="99999">
-      <Image id="bg" x="0" y="0" width="1100" height="680" rightbottom="rightbottom" image="solid.primary" resize="scale"/>
-      <Image id="art" x="0" y="40" width="1100" height="544" rightbottom="rightbottom" image="video.placeholder" resize="scale2" art="true"/>
-      <Video id="video" x="0" y="40" width="1100" height="544" rightbottom="rightbottom" visible="vlc.hasVout"/>
-      <Panel id="bar" x="0" y="584" width="1100" height="96" lefttop="leftbottom" rightbottom="rightbottom">
-        <Image id="bar.bg" x="0" y="0" width="1100" height="96" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
-        <Image id="bar.edge" x="0" y="0" width="1100" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Button id="btn.prev" x="24" y="18" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()" tooltiptext="Previous"/>
-        <Checkbox id="btn.play" x="64" y="14" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
-        <Button id="btn.next" x="144" y="18" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()" tooltiptext="Next"/>
-        <Text id="time.elapsed" x="196" y="27" width="70" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
-        <Slider id="seek" x="266" y="31" rightbottom="rightbottom" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(733,3)" tooltiptext="Seek: $T / $D">
-          <SliderBackground id="seek.bg" image="seek.strip" nbhoriz="61"/>
+  <Window id="main" visible="true" x="320" y="140">
+    <Layout id="normal" width="1280" height="800" minwidth="1000" maxwidth="99999" minheight="520" maxheight="99999">
+      <Image id="normal.bg" x="0" y="0" width="1280" height="800" rightbottom="rightbottom" image="solid.primary" resize="scale"/>
+      <Image id="normal.art" x="0" y="40" width="1280" height="664" rightbottom="rightbottom" image="video.placeholder" resize="scale2" art="true"/>
+      <Video id="normal.video" x="0" y="40" width="1280" height="664" rightbottom="rightbottom" visible="vlc.hasVout"/>
+      <Panel id="normal.bar" x="0" y="704" width="1280" height="96" lefttop="leftbottom" rightbottom="rightbottom">
+        <Image id="normal.bar.bg" x="0" y="0" width="1280" height="96" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
+        <Image id="normal.bar.edge" x="0" y="0" width="1280" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Button id="normal.btn.prev" x="24" y="18" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()" tooltiptext="Previous"/>
+        <Checkbox id="normal.btn.play" x="64" y="14" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
+        <Button id="normal.btn.next" x="144" y="18" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()" tooltiptext="Next"/>
+        <Text id="normal.time.elapsed" x="196" y="27" width="70" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
+        <Slider id="normal.seek" x="266" y="31" rightbottom="rightbottom" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(913,3)" tooltiptext="Seek: $T / $D">
+          <SliderBackground id="normal.seek.bg" image="seek.strip" nbhoriz="61"/>
         </Slider>
-        <Text id="time.total" x="1008" y="27" width="68" lefttop="righttop" rightbottom="righttop" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Text id="bar.title" x="24" y="64" width="600" rightbottom="righttop" text="$N" font="font.large" color="#FFFFFF" scrolling="auto" focus="false"/>
-        <Button id="btn.pip" x="660" y="56" lefttop="righttop" rightbottom="righttop" up="icons.pip.normal" down="icons.pip.down" over="icons.pip.over" action="miniwin.show()" tooltiptext="Mini player"/>
-        <Checkbox id="btn.mute" x="700" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()" tooltiptext1="Unmute" tooltiptext2="Mute"/>
-        <Text id="volume.label" x="740" y="65" width="32" lefttop="righttop" rightbottom="righttop" text="$V%" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Slider id="volume" x="780" y="64" lefttop="righttop" rightbottom="righttop" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)" tooltiptext="Volume: $V%">
-          <SliderBackground id="volume.bg" image="vol.strip" nbhoriz="41"/>
+        <Text id="normal.time.total" x="1188" y="27" width="68" lefttop="righttop" rightbottom="righttop" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Text id="normal.bar.title" x="24" y="64" width="780" rightbottom="righttop" text="$N" font="font.large" color="#FFFFFF" scrolling="auto" focus="false"/>
+        <Button id="normal.btn.pip" x="840" y="56" lefttop="righttop" rightbottom="righttop" up="icons.pip.normal" down="icons.pip.down" over="icons.pip.over" action="miniwin.show()" tooltiptext="Mini player"/>
+        <Checkbox id="normal.btn.mute" x="880" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()" tooltiptext1="Unmute" tooltiptext2="Mute"/>
+        <Text id="normal.volume.label" x="920" y="65" width="32" lefttop="righttop" rightbottom="righttop" text="$V%" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Slider id="normal.volume" x="960" y="64" lefttop="righttop" rightbottom="righttop" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)" tooltiptext="Volume: $V%">
+          <SliderBackground id="normal.volume.bg" image="vol.strip" nbhoriz="41"/>
         </Slider>
-        <Button id="btn.tracks" x="924" y="56" lefttop="righttop" rightbottom="righttop" up="icons.tracks.normal" down="icons.tracks.down" over="icons.tracks.over" action="tracks_menu.show()" tooltiptext="Tracks"/>
-        <Checkbox id="btn.prefs" x="964" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.gear.on.normal" down1="icons.gear.on.down" over1="icons.gear.on.over" up2="icons.gear.normal" down2="icons.gear.down" over2="icons.gear.over" state="sidebar_audio.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_audio)" tooltiptext1="Hide the audio panel" tooltiptext2="Audio and equalizer"/>
-        <Checkbox id="btn.queue" x="1004" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.queue.on.normal" down1="icons.queue.on.down" over1="icons.queue.on.over" up2="icons.queue.normal" down2="icons.queue.down" over2="icons.queue.over" state="sidebar_queue.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_queue)" tooltiptext1="Hide queue" tooltiptext2="Queue"/>
-        <Button id="btn.fullscreen" x="1044" y="56" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
+        <Button id="normal.btn.tracks" x="1104" y="56" lefttop="righttop" rightbottom="righttop" up="icons.tracks.normal" down="icons.tracks.down" over="icons.tracks.over" action="tracks_menu.show()" tooltiptext="Tracks"/>
+        <Checkbox id="normal.btn.prefs" x="1144" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.gear.on.normal" down1="icons.gear.on.down" over1="icons.gear.on.over" up2="icons.gear.normal" down2="icons.gear.down" over2="icons.gear.over" state="sidebar_audio.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_audio)" tooltiptext1="Hide the audio panel" tooltiptext2="Audio and equalizer"/>
+        <Checkbox id="normal.btn.queue" x="1184" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.queue.on.normal" down1="icons.queue.on.down" over1="icons.queue.on.over" up2="icons.queue.normal" down2="icons.queue.down" over2="icons.queue.over" state="sidebar_queue.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_queue)" tooltiptext1="Hide queue" tooltiptext2="Queue"/>
+        <Button id="normal.btn.fullscreen" x="1224" y="56" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
       </Panel>
-      <Panel id="topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
-        <Image id="topbar.bg" x="0" y="0" width="1100" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
-        <Image id="topbar.edge" x="0" y="39" width="1100" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Image id="topbar.logo" x="16" y="9" width="22" height="22" image="logo"/>
-        <Button id="topbar.menu" x="48" y="4" up="icons.menu.normal" down="icons.menu.down" over="icons.menu.over" action="main_menu.show()" tooltiptext="Main menu"/>
-        <Button id="topbar.folder" x="88" y="4" up="icons.folder.normal" down="icons.folder.down" over="icons.folder.over" action="dialogs.playlist()" tooltiptext="Show the playlist"/>
-        <Text id="topbar.crumb" x="128" y="13" width="320" text="$N" font="defaultfont" color="#888888" scrolling="auto" focus="false"/>
-        <Text id="topbar.info" x="728" y="13" width="220" lefttop="righttop" rightbottom="righttop" text="$B kb/s   $S Hz" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Button id="win.min" x="968" y="4" lefttop="righttop" rightbottom="righttop" up="icons.win_min.normal" down="icons.win_min.down" over="icons.win_min.over" action="vlc.minimize()" tooltiptext="Minimise"/>
-        <Checkbox id="win.max" x="1012" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
-        <Button id="win.close" x="1056" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
+      <Panel id="normal.topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
+        <Image id="normal.topbar.bg" x="0" y="0" width="1280" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
+        <Image id="normal.topbar.edge" x="0" y="39" width="1280" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Image id="normal.topbar.logo" x="16" y="9" width="22" height="22" image="logo"/>
+        <Button id="normal.topbar.menu" x="48" y="4" up="icons.menu.normal" down="icons.menu.down" over="icons.menu.over" action="main_menu.show()" tooltiptext="Main menu"/>
+        <Button id="normal.topbar.folder" x="88" y="4" up="icons.folder.normal" down="icons.folder.down" over="icons.folder.over" action="dialogs.playlist()" tooltiptext="Show the playlist"/>
+        <Text id="normal.topbar.crumb" x="128" y="13" width="320" text="$N" font="defaultfont" color="#888888" scrolling="auto" focus="false"/>
+        <Text id="normal.topbar.info" x="908" y="13" width="220" lefttop="righttop" rightbottom="righttop" text="$B kb/s   $S Hz" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Button id="normal.win.min" x="1148" y="4" lefttop="righttop" rightbottom="righttop" up="icons.win_min.normal" down="icons.win_min.down" over="icons.win_min.over" action="vlc.minimize()" tooltiptext="Minimise"/>
+        <Checkbox id="normal.win.max" x="1192" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
+        <Button id="normal.win.close" x="1236" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
       </Panel>
-      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
-      <Image id="grip.s" x="0" y="674" width="1086" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
-      <Image id="grip.se" x="1086" y="666" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
+      <Image id="normal.grip.e" x="1274" y="40" width="6" height="754" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
+      <Image id="normal.grip.s" x="0" y="794" width="1266" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
+      <Image id="normal.grip.se" x="1266" y="786" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
     </Layout>
-    <Layout id="sidebar_queue" width="1100" height="680" minwidth="1000" maxwidth="99999" minheight="520" maxheight="99999">
-      <Image id="bg" x="0" y="0" width="1100" height="680" rightbottom="rightbottom" image="solid.primary" resize="scale"/>
-      <Image id="art" x="0" y="40" width="780" height="544" rightbottom="rightbottom" image="video.placeholder" resize="scale2" art="true"/>
-      <Video id="video" x="0" y="40" width="780" height="544" rightbottom="rightbottom" visible="vlc.hasVout"/>
-      <Panel id="bar" x="0" y="584" width="780" height="96" lefttop="leftbottom" rightbottom="rightbottom">
-        <Image id="bar.bg" x="0" y="0" width="780" height="96" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
-        <Image id="bar.edge" x="0" y="0" width="780" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Button id="btn.prev" x="24" y="18" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()" tooltiptext="Previous"/>
-        <Checkbox id="btn.play" x="64" y="14" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
-        <Button id="btn.next" x="144" y="18" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()" tooltiptext="Next"/>
-        <Text id="time.elapsed" x="196" y="27" width="70" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
-        <Slider id="seek" x="266" y="31" rightbottom="rightbottom" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(413,3)" tooltiptext="Seek: $T / $D">
-          <SliderBackground id="seek.bg" image="seek.strip.drawer" nbhoriz="61"/>
+    <Layout id="sidebar_queue" width="1280" height="800" minwidth="1000" maxwidth="99999" minheight="520" maxheight="99999">
+      <Image id="sidebar_queue.bg" x="0" y="0" width="1280" height="800" rightbottom="rightbottom" image="solid.primary" resize="scale"/>
+      <Image id="sidebar_queue.art" x="0" y="40" width="960" height="664" rightbottom="rightbottom" image="video.placeholder" resize="scale2" art="true"/>
+      <Video id="sidebar_queue.video" x="0" y="40" width="960" height="664" rightbottom="rightbottom" visible="vlc.hasVout"/>
+      <Panel id="sidebar_queue.bar" x="0" y="704" width="960" height="96" lefttop="leftbottom" rightbottom="rightbottom">
+        <Image id="sidebar_queue.bar.bg" x="0" y="0" width="960" height="96" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
+        <Image id="sidebar_queue.bar.edge" x="0" y="0" width="960" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Button id="sidebar_queue.btn.prev" x="24" y="18" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()" tooltiptext="Previous"/>
+        <Checkbox id="sidebar_queue.btn.play" x="64" y="14" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
+        <Button id="sidebar_queue.btn.next" x="144" y="18" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()" tooltiptext="Next"/>
+        <Text id="sidebar_queue.time.elapsed" x="196" y="27" width="70" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
+        <Slider id="sidebar_queue.seek" x="266" y="31" rightbottom="rightbottom" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(593,3)" tooltiptext="Seek: $T / $D">
+          <SliderBackground id="sidebar_queue.seek.bg" image="seek.strip.drawer" nbhoriz="61"/>
         </Slider>
-        <Text id="time.total" x="688" y="27" width="68" lefttop="righttop" rightbottom="righttop" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Text id="bar.title" x="24" y="64" width="280" rightbottom="righttop" text="$N" font="font.large" color="#FFFFFF" scrolling="auto" focus="false"/>
-        <Button id="btn.pip" x="340" y="56" lefttop="righttop" rightbottom="righttop" up="icons.pip.normal" down="icons.pip.down" over="icons.pip.over" action="miniwin.show()" tooltiptext="Mini player"/>
-        <Checkbox id="btn.mute" x="380" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()" tooltiptext1="Unmute" tooltiptext2="Mute"/>
-        <Text id="volume.label" x="420" y="65" width="32" lefttop="righttop" rightbottom="righttop" text="$V%" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Slider id="volume" x="460" y="64" lefttop="righttop" rightbottom="righttop" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)" tooltiptext="Volume: $V%">
-          <SliderBackground id="volume.bg" image="vol.strip" nbhoriz="41"/>
+        <Text id="sidebar_queue.time.total" x="868" y="27" width="68" lefttop="righttop" rightbottom="righttop" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Text id="sidebar_queue.bar.title" x="24" y="64" width="460" rightbottom="righttop" text="$N" font="font.large" color="#FFFFFF" scrolling="auto" focus="false"/>
+        <Button id="sidebar_queue.btn.pip" x="520" y="56" lefttop="righttop" rightbottom="righttop" up="icons.pip.normal" down="icons.pip.down" over="icons.pip.over" action="miniwin.show()" tooltiptext="Mini player"/>
+        <Checkbox id="sidebar_queue.btn.mute" x="560" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()" tooltiptext1="Unmute" tooltiptext2="Mute"/>
+        <Text id="sidebar_queue.volume.label" x="600" y="65" width="32" lefttop="righttop" rightbottom="righttop" text="$V%" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Slider id="sidebar_queue.volume" x="640" y="64" lefttop="righttop" rightbottom="righttop" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)" tooltiptext="Volume: $V%">
+          <SliderBackground id="sidebar_queue.volume.bg" image="vol.strip" nbhoriz="41"/>
         </Slider>
-        <Button id="btn.tracks" x="604" y="56" lefttop="righttop" rightbottom="righttop" up="icons.tracks.normal" down="icons.tracks.down" over="icons.tracks.over" action="tracks_menu.show()" tooltiptext="Tracks"/>
-        <Checkbox id="btn.prefs" x="644" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.gear.on.normal" down1="icons.gear.on.down" over1="icons.gear.on.over" up2="icons.gear.normal" down2="icons.gear.down" over2="icons.gear.over" state="sidebar_audio.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_audio)" tooltiptext1="Hide the audio panel" tooltiptext2="Audio and equalizer"/>
-        <Checkbox id="btn.queue" x="684" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.queue.on.normal" down1="icons.queue.on.down" over1="icons.queue.on.over" up2="icons.queue.normal" down2="icons.queue.down" over2="icons.queue.over" state="sidebar_queue.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_queue)" tooltiptext1="Hide queue" tooltiptext2="Queue"/>
-        <Button id="btn.fullscreen" x="724" y="56" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
+        <Button id="sidebar_queue.btn.tracks" x="784" y="56" lefttop="righttop" rightbottom="righttop" up="icons.tracks.normal" down="icons.tracks.down" over="icons.tracks.over" action="tracks_menu.show()" tooltiptext="Tracks"/>
+        <Checkbox id="sidebar_queue.btn.prefs" x="824" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.gear.on.normal" down1="icons.gear.on.down" over1="icons.gear.on.over" up2="icons.gear.normal" down2="icons.gear.down" over2="icons.gear.over" state="sidebar_audio.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_audio)" tooltiptext1="Hide the audio panel" tooltiptext2="Audio and equalizer"/>
+        <Checkbox id="sidebar_queue.btn.queue" x="864" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.queue.on.normal" down1="icons.queue.on.down" over1="icons.queue.on.over" up2="icons.queue.normal" down2="icons.queue.down" over2="icons.queue.over" state="sidebar_queue.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_queue)" tooltiptext1="Hide queue" tooltiptext2="Queue"/>
+        <Button id="sidebar_queue.btn.fullscreen" x="904" y="56" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
       </Panel>
-      <Panel id="drawer" x="780" y="40" width="320" height="640" lefttop="righttop" rightbottom="rightbottom">
-        <Image id="drawer.bg" x="0" y="0" width="320" height="640" rightbottom="rightbottom" image="solid.secondary" resize="scale"/>
-        <Image id="drawer.edge" x="0" y="0" width="1" height="640" rightbottom="rightbottom" image="border.v" resize="scale"/>
-        <Checkbox id="tab.queue" x="16" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_queue.isActive" action1="main.setLayout(sidebar_queue)" action2="main.setLayout(sidebar_queue)"/>
-        <Text id="tab.queue.label.on" x="16" y="22" width="88" visible="sidebar_queue.isActive" text="Queue" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
-        <Text id="tab.queue.label.off" x="16" y="22" width="88" visible="not sidebar_queue.isActive" text="Queue" font="font.bold" color="#888888" alignment="center" focus="false"/>
-        <Checkbox id="tab.audio" x="116" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_audio.isActive" action1="main.setLayout(sidebar_audio)" action2="main.setLayout(sidebar_audio)"/>
-        <Text id="tab.audio.label.on" x="116" y="22" width="88" visible="sidebar_audio.isActive" text="Audio" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
-        <Text id="tab.audio.label.off" x="116" y="22" width="88" visible="not sidebar_audio.isActive" text="Audio" font="font.bold" color="#888888" alignment="center" focus="false"/>
-        <Button id="drawer.close" x="280" y="12" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="main.setLayout(normal)" tooltiptext="Close panel"/>
-        <Image id="drawer.divider" x="0" y="56" width="320" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Playlist id="queue.list" x="8" y="72" width="304" height="504" rightbottom="rightbottom" font="defaultfont" fgcolor="#FFFFFF" playcolor="#E07A1E" bgcolor1="#1A1A1A" bgcolor2="#1A1A1A" selcolor="#2F2F2F"/>
-        <Button id="queue.add" x="16" y="596" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.add()"/>
-        <Text id="queue.add.label" x="16" y="603" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Add" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
-        <Button id="queue.remove" x="116" y="596" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.del()"/>
-        <Text id="queue.remove.label" x="116" y="603" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Remove" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
-        <Button id="queue.sort" x="216" y="596" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.sort()"/>
-        <Text id="queue.sort.label" x="216" y="603" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Sort" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
+      <Panel id="sidebar_queue.drawer" x="960" y="40" width="320" height="760" lefttop="righttop" rightbottom="rightbottom">
+        <Image id="sidebar_queue.drawer.bg" x="0" y="0" width="320" height="760" rightbottom="rightbottom" image="solid.secondary" resize="scale"/>
+        <Image id="sidebar_queue.drawer.edge" x="0" y="0" width="1" height="760" rightbottom="rightbottom" image="border.v" resize="scale"/>
+        <Checkbox id="sidebar_queue.tab.queue" x="16" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_queue.isActive" action1="main.setLayout(sidebar_queue)" action2="main.setLayout(sidebar_queue)"/>
+        <Text id="sidebar_queue.tab.queue.label.on" x="16" y="22" width="88" visible="sidebar_queue.isActive" text="Queue" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
+        <Text id="sidebar_queue.tab.queue.label.off" x="16" y="22" width="88" visible="not sidebar_queue.isActive" text="Queue" font="font.bold" color="#888888" alignment="center" focus="false"/>
+        <Checkbox id="sidebar_queue.tab.audio" x="116" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_audio.isActive" action1="main.setLayout(sidebar_audio)" action2="main.setLayout(sidebar_audio)"/>
+        <Text id="sidebar_queue.tab.audio.label.on" x="116" y="22" width="88" visible="sidebar_audio.isActive" text="Audio" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
+        <Text id="sidebar_queue.tab.audio.label.off" x="116" y="22" width="88" visible="not sidebar_audio.isActive" text="Audio" font="font.bold" color="#888888" alignment="center" focus="false"/>
+        <Button id="sidebar_queue.drawer.close" x="280" y="12" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="main.setLayout(normal)" tooltiptext="Close panel"/>
+        <Image id="sidebar_queue.drawer.divider" x="0" y="56" width="320" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Playlist id="sidebar_queue.queue.list" x="8" y="72" width="304" height="624" rightbottom="rightbottom" font="defaultfont" fgcolor="#FFFFFF" playcolor="#E07A1E" bgcolor1="#1A1A1A" bgcolor2="#1A1A1A" selcolor="#2F2F2F"/>
+        <Button id="sidebar_queue.queue.add" x="16" y="716" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.add()"/>
+        <Text id="sidebar_queue.queue.add.label" x="16" y="723" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Add" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
+        <Button id="sidebar_queue.queue.remove" x="116" y="716" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.del()"/>
+        <Text id="sidebar_queue.queue.remove.label" x="116" y="723" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Remove" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
+        <Button id="sidebar_queue.queue.sort" x="216" y="716" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.sort()"/>
+        <Text id="sidebar_queue.queue.sort.label" x="216" y="723" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Sort" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
       </Panel>
-      <Panel id="topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
-        <Image id="topbar.bg" x="0" y="0" width="1100" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
-        <Image id="topbar.edge" x="0" y="39" width="1100" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Image id="topbar.logo" x="16" y="9" width="22" height="22" image="logo"/>
-        <Button id="topbar.menu" x="48" y="4" up="icons.menu.normal" down="icons.menu.down" over="icons.menu.over" action="main_menu.show()" tooltiptext="Main menu"/>
-        <Button id="topbar.folder" x="88" y="4" up="icons.folder.normal" down="icons.folder.down" over="icons.folder.over" action="dialogs.playlist()" tooltiptext="Show the playlist"/>
-        <Text id="topbar.crumb" x="128" y="13" width="320" text="$N" font="defaultfont" color="#888888" scrolling="auto" focus="false"/>
-        <Text id="topbar.info" x="728" y="13" width="220" lefttop="righttop" rightbottom="righttop" text="$B kb/s   $S Hz" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Button id="win.min" x="968" y="4" lefttop="righttop" rightbottom="righttop" up="icons.win_min.normal" down="icons.win_min.down" over="icons.win_min.over" action="vlc.minimize()" tooltiptext="Minimise"/>
-        <Checkbox id="win.max" x="1012" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
-        <Button id="win.close" x="1056" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
+      <Panel id="sidebar_queue.topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
+        <Image id="sidebar_queue.topbar.bg" x="0" y="0" width="1280" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
+        <Image id="sidebar_queue.topbar.edge" x="0" y="39" width="1280" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Image id="sidebar_queue.topbar.logo" x="16" y="9" width="22" height="22" image="logo"/>
+        <Button id="sidebar_queue.topbar.menu" x="48" y="4" up="icons.menu.normal" down="icons.menu.down" over="icons.menu.over" action="main_menu.show()" tooltiptext="Main menu"/>
+        <Button id="sidebar_queue.topbar.folder" x="88" y="4" up="icons.folder.normal" down="icons.folder.down" over="icons.folder.over" action="dialogs.playlist()" tooltiptext="Show the playlist"/>
+        <Text id="sidebar_queue.topbar.crumb" x="128" y="13" width="320" text="$N" font="defaultfont" color="#888888" scrolling="auto" focus="false"/>
+        <Text id="sidebar_queue.topbar.info" x="908" y="13" width="220" lefttop="righttop" rightbottom="righttop" text="$B kb/s   $S Hz" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Button id="sidebar_queue.win.min" x="1148" y="4" lefttop="righttop" rightbottom="righttop" up="icons.win_min.normal" down="icons.win_min.down" over="icons.win_min.over" action="vlc.minimize()" tooltiptext="Minimise"/>
+        <Checkbox id="sidebar_queue.win.max" x="1192" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
+        <Button id="sidebar_queue.win.close" x="1236" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
       </Panel>
-      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
-      <Image id="grip.s" x="0" y="674" width="1086" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
-      <Image id="grip.se" x="1086" y="666" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
+      <Image id="sidebar_queue.grip.e" x="1274" y="40" width="6" height="754" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
+      <Image id="sidebar_queue.grip.s" x="0" y="794" width="1266" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
+      <Image id="sidebar_queue.grip.se" x="1266" y="786" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
     </Layout>
-    <Layout id="sidebar_audio" width="1100" height="680" minwidth="1000" maxwidth="99999" minheight="520" maxheight="99999">
-      <Image id="bg" x="0" y="0" width="1100" height="680" rightbottom="rightbottom" image="solid.primary" resize="scale"/>
-      <Image id="art" x="0" y="40" width="780" height="544" rightbottom="rightbottom" image="video.placeholder" resize="scale2" art="true"/>
-      <Video id="video" x="0" y="40" width="780" height="544" rightbottom="rightbottom" visible="vlc.hasVout"/>
-      <Panel id="bar" x="0" y="584" width="780" height="96" lefttop="leftbottom" rightbottom="rightbottom">
-        <Image id="bar.bg" x="0" y="0" width="780" height="96" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
-        <Image id="bar.edge" x="0" y="0" width="780" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Button id="btn.prev" x="24" y="18" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()" tooltiptext="Previous"/>
-        <Checkbox id="btn.play" x="64" y="14" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
-        <Button id="btn.next" x="144" y="18" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()" tooltiptext="Next"/>
-        <Text id="time.elapsed" x="196" y="27" width="70" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
-        <Slider id="seek" x="266" y="31" rightbottom="rightbottom" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(413,3)" tooltiptext="Seek: $T / $D">
-          <SliderBackground id="seek.bg" image="seek.strip.drawer" nbhoriz="61"/>
+    <Layout id="sidebar_audio" width="1280" height="800" minwidth="1000" maxwidth="99999" minheight="520" maxheight="99999">
+      <Image id="sidebar_audio.bg" x="0" y="0" width="1280" height="800" rightbottom="rightbottom" image="solid.primary" resize="scale"/>
+      <Image id="sidebar_audio.art" x="0" y="40" width="960" height="664" rightbottom="rightbottom" image="video.placeholder" resize="scale2" art="true"/>
+      <Video id="sidebar_audio.video" x="0" y="40" width="960" height="664" rightbottom="rightbottom" visible="vlc.hasVout"/>
+      <Panel id="sidebar_audio.bar" x="0" y="704" width="960" height="96" lefttop="leftbottom" rightbottom="rightbottom">
+        <Image id="sidebar_audio.bar.bg" x="0" y="0" width="960" height="96" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
+        <Image id="sidebar_audio.bar.edge" x="0" y="0" width="960" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Button id="sidebar_audio.btn.prev" x="24" y="18" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()" tooltiptext="Previous"/>
+        <Checkbox id="sidebar_audio.btn.play" x="64" y="14" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
+        <Button id="sidebar_audio.btn.next" x="144" y="18" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()" tooltiptext="Next"/>
+        <Text id="sidebar_audio.time.elapsed" x="196" y="27" width="70" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
+        <Slider id="sidebar_audio.seek" x="266" y="31" rightbottom="rightbottom" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(593,3)" tooltiptext="Seek: $T / $D">
+          <SliderBackground id="sidebar_audio.seek.bg" image="seek.strip.drawer" nbhoriz="61"/>
         </Slider>
-        <Text id="time.total" x="688" y="27" width="68" lefttop="righttop" rightbottom="righttop" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Text id="bar.title" x="24" y="64" width="280" rightbottom="righttop" text="$N" font="font.large" color="#FFFFFF" scrolling="auto" focus="false"/>
-        <Button id="btn.pip" x="340" y="56" lefttop="righttop" rightbottom="righttop" up="icons.pip.normal" down="icons.pip.down" over="icons.pip.over" action="miniwin.show()" tooltiptext="Mini player"/>
-        <Checkbox id="btn.mute" x="380" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()" tooltiptext1="Unmute" tooltiptext2="Mute"/>
-        <Text id="volume.label" x="420" y="65" width="32" lefttop="righttop" rightbottom="righttop" text="$V%" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Slider id="volume" x="460" y="64" lefttop="righttop" rightbottom="righttop" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)" tooltiptext="Volume: $V%">
-          <SliderBackground id="volume.bg" image="vol.strip" nbhoriz="41"/>
+        <Text id="sidebar_audio.time.total" x="868" y="27" width="68" lefttop="righttop" rightbottom="righttop" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Text id="sidebar_audio.bar.title" x="24" y="64" width="460" rightbottom="righttop" text="$N" font="font.large" color="#FFFFFF" scrolling="auto" focus="false"/>
+        <Button id="sidebar_audio.btn.pip" x="520" y="56" lefttop="righttop" rightbottom="righttop" up="icons.pip.normal" down="icons.pip.down" over="icons.pip.over" action="miniwin.show()" tooltiptext="Mini player"/>
+        <Checkbox id="sidebar_audio.btn.mute" x="560" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()" tooltiptext1="Unmute" tooltiptext2="Mute"/>
+        <Text id="sidebar_audio.volume.label" x="600" y="65" width="32" lefttop="righttop" rightbottom="righttop" text="$V%" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Slider id="sidebar_audio.volume" x="640" y="64" lefttop="righttop" rightbottom="righttop" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)" tooltiptext="Volume: $V%">
+          <SliderBackground id="sidebar_audio.volume.bg" image="vol.strip" nbhoriz="41"/>
         </Slider>
-        <Button id="btn.tracks" x="604" y="56" lefttop="righttop" rightbottom="righttop" up="icons.tracks.normal" down="icons.tracks.down" over="icons.tracks.over" action="tracks_menu.show()" tooltiptext="Tracks"/>
-        <Checkbox id="btn.prefs" x="644" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.gear.on.normal" down1="icons.gear.on.down" over1="icons.gear.on.over" up2="icons.gear.normal" down2="icons.gear.down" over2="icons.gear.over" state="sidebar_audio.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_audio)" tooltiptext1="Hide the audio panel" tooltiptext2="Audio and equalizer"/>
-        <Checkbox id="btn.queue" x="684" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.queue.on.normal" down1="icons.queue.on.down" over1="icons.queue.on.over" up2="icons.queue.normal" down2="icons.queue.down" over2="icons.queue.over" state="sidebar_queue.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_queue)" tooltiptext1="Hide queue" tooltiptext2="Queue"/>
-        <Button id="btn.fullscreen" x="724" y="56" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
+        <Button id="sidebar_audio.btn.tracks" x="784" y="56" lefttop="righttop" rightbottom="righttop" up="icons.tracks.normal" down="icons.tracks.down" over="icons.tracks.over" action="tracks_menu.show()" tooltiptext="Tracks"/>
+        <Checkbox id="sidebar_audio.btn.prefs" x="824" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.gear.on.normal" down1="icons.gear.on.down" over1="icons.gear.on.over" up2="icons.gear.normal" down2="icons.gear.down" over2="icons.gear.over" state="sidebar_audio.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_audio)" tooltiptext1="Hide the audio panel" tooltiptext2="Audio and equalizer"/>
+        <Checkbox id="sidebar_audio.btn.queue" x="864" y="56" lefttop="righttop" rightbottom="righttop" up1="icons.queue.on.normal" down1="icons.queue.on.down" over1="icons.queue.on.over" up2="icons.queue.normal" down2="icons.queue.down" over2="icons.queue.over" state="sidebar_queue.isActive" action1="main.setLayout(normal)" action2="main.setLayout(sidebar_queue)" tooltiptext1="Hide queue" tooltiptext2="Queue"/>
+        <Button id="sidebar_audio.btn.fullscreen" x="904" y="56" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
       </Panel>
-      <Panel id="drawer" x="780" y="40" width="320" height="640" lefttop="righttop" rightbottom="rightbottom">
-        <Image id="drawer.bg" x="0" y="0" width="320" height="640" rightbottom="rightbottom" image="solid.secondary" resize="scale"/>
-        <Image id="drawer.edge" x="0" y="0" width="1" height="640" rightbottom="rightbottom" image="border.v" resize="scale"/>
-        <Checkbox id="tab.queue" x="16" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_queue.isActive" action1="main.setLayout(sidebar_queue)" action2="main.setLayout(sidebar_queue)"/>
-        <Text id="tab.queue.label.on" x="16" y="22" width="88" visible="sidebar_queue.isActive" text="Queue" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
-        <Text id="tab.queue.label.off" x="16" y="22" width="88" visible="not sidebar_queue.isActive" text="Queue" font="font.bold" color="#888888" alignment="center" focus="false"/>
-        <Checkbox id="tab.audio" x="116" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_audio.isActive" action1="main.setLayout(sidebar_audio)" action2="main.setLayout(sidebar_audio)"/>
-        <Text id="tab.audio.label.on" x="116" y="22" width="88" visible="sidebar_audio.isActive" text="Audio" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
-        <Text id="tab.audio.label.off" x="116" y="22" width="88" visible="not sidebar_audio.isActive" text="Audio" font="font.bold" color="#888888" alignment="center" focus="false"/>
-        <Button id="drawer.close" x="280" y="12" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="main.setLayout(normal)" tooltiptext="Close panel"/>
-        <Image id="drawer.divider" x="0" y="56" width="320" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Text id="eq.title" x="16" y="70" width="200" text="Equalizer" font="font.bold.large" color="#FFFFFF" focus="false"/>
-        <Checkbox id="eq.toggle" x="260" y="68" lefttop="righttop" rightbottom="righttop" up1="toggle.on.normal" down1="toggle.on.down" over1="toggle.on.over" up2="toggle.off.normal" down2="toggle.off.down" over2="toggle.off.over" state="equalizer.isEnabled" action1="equalizer.disable()" action2="equalizer.enable()" tooltiptext1="Disable equalizer" tooltiptext2="Enable equalizer"/>
-        <Image id="eq.track.preamp" x="32" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.preamp" x="34" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.preamp" points="(0,279),(0,112)" tooltiptext="Preamp"/>
-        <Text id="eq.preamp.label" x="18" y="288" width="32" text="pre" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b0" x="68" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band0" x="70" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(0)" points="(0,279),(0,112)" tooltiptext="60 Hz"/>
-        <Text id="eq.band0.label" x="54" y="288" width="32" text="60" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b1" x="92" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band1" x="94" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(1)" points="(0,279),(0,112)" tooltiptext="170 Hz"/>
-        <Text id="eq.band1.label" x="78" y="288" width="32" text="170" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b2" x="116" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band2" x="118" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(2)" points="(0,279),(0,112)" tooltiptext="310 Hz"/>
-        <Text id="eq.band2.label" x="102" y="288" width="32" text="310" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b3" x="140" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band3" x="142" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(3)" points="(0,279),(0,112)" tooltiptext="600 Hz"/>
-        <Text id="eq.band3.label" x="126" y="288" width="32" text="600" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b4" x="164" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band4" x="166" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(4)" points="(0,279),(0,112)" tooltiptext="1k Hz"/>
-        <Text id="eq.band4.label" x="150" y="288" width="32" text="1k" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b5" x="188" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band5" x="190" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(5)" points="(0,279),(0,112)" tooltiptext="3k Hz"/>
-        <Text id="eq.band5.label" x="174" y="288" width="32" text="3k" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b6" x="212" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band6" x="214" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(6)" points="(0,279),(0,112)" tooltiptext="6k Hz"/>
-        <Text id="eq.band6.label" x="198" y="288" width="32" text="6k" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b7" x="236" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band7" x="238" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(7)" points="(0,279),(0,112)" tooltiptext="12k Hz"/>
-        <Text id="eq.band7.label" x="222" y="288" width="32" text="12k" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b8" x="260" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band8" x="262" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(8)" points="(0,279),(0,112)" tooltiptext="14k Hz"/>
-        <Text id="eq.band8.label" x="246" y="288" width="32" text="14k" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Image id="eq.track.b9" x="284" y="112" width="6" height="168" image="eq.track"/>
-        <Slider id="eq.band9" x="286" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(9)" points="(0,279),(0,112)" tooltiptext="16k Hz"/>
-        <Text id="eq.band9.label" x="270" y="288" width="32" text="16k" font="font.small" color="#888888" alignment="center" focus="false"/>
-        <Text id="eq.info.bitrate" x="16" y="328" width="288" text="Bitrate: $B kb/s" font="defaultfont" color="#888888" focus="false"/>
-        <Text id="eq.info.rate" x="16" y="346" width="288" text="Sample rate: $S Hz" font="defaultfont" color="#888888" focus="false"/>
+      <Panel id="sidebar_audio.drawer" x="960" y="40" width="320" height="760" lefttop="righttop" rightbottom="rightbottom">
+        <Image id="sidebar_audio.drawer.bg" x="0" y="0" width="320" height="760" rightbottom="rightbottom" image="solid.secondary" resize="scale"/>
+        <Image id="sidebar_audio.drawer.edge" x="0" y="0" width="1" height="760" rightbottom="rightbottom" image="border.v" resize="scale"/>
+        <Checkbox id="sidebar_audio.tab.queue" x="16" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_queue.isActive" action1="main.setLayout(sidebar_queue)" action2="main.setLayout(sidebar_queue)"/>
+        <Text id="sidebar_audio.tab.queue.label.on" x="16" y="22" width="88" visible="sidebar_queue.isActive" text="Queue" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
+        <Text id="sidebar_audio.tab.queue.label.off" x="16" y="22" width="88" visible="not sidebar_queue.isActive" text="Queue" font="font.bold" color="#888888" alignment="center" focus="false"/>
+        <Checkbox id="sidebar_audio.tab.audio" x="116" y="12" up1="tab.active" down1="tab.active" over1="tab.active" up2="blank" down2="tab.active" over2="tab.over" state="sidebar_audio.isActive" action1="main.setLayout(sidebar_audio)" action2="main.setLayout(sidebar_audio)"/>
+        <Text id="sidebar_audio.tab.audio.label.on" x="116" y="22" width="88" visible="sidebar_audio.isActive" text="Audio" font="font.bold" color="#FFFFFF" alignment="center" focus="false"/>
+        <Text id="sidebar_audio.tab.audio.label.off" x="116" y="22" width="88" visible="not sidebar_audio.isActive" text="Audio" font="font.bold" color="#888888" alignment="center" focus="false"/>
+        <Button id="sidebar_audio.drawer.close" x="280" y="12" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="main.setLayout(normal)" tooltiptext="Close panel"/>
+        <Image id="sidebar_audio.drawer.divider" x="0" y="56" width="320" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Text id="sidebar_audio.eq.title" x="16" y="70" width="200" text="Equalizer" font="font.bold.large" color="#FFFFFF" focus="false"/>
+        <Checkbox id="sidebar_audio.eq.toggle" x="260" y="68" lefttop="righttop" rightbottom="righttop" up1="toggle.on.normal" down1="toggle.on.down" over1="toggle.on.over" up2="toggle.off.normal" down2="toggle.off.down" over2="toggle.off.over" state="equalizer.isEnabled" action1="equalizer.disable()" action2="equalizer.enable()" tooltiptext1="Disable equalizer" tooltiptext2="Enable equalizer"/>
+        <Image id="sidebar_audio.eq.track.preamp" x="32" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.preamp" x="34" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.preamp" points="(0,279),(0,112)" tooltiptext="Preamp"/>
+        <Text id="sidebar_audio.eq.preamp.label" x="18" y="288" width="32" text="pre" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b0" x="68" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band0" x="70" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(0)" points="(0,279),(0,112)" tooltiptext="60 Hz"/>
+        <Text id="sidebar_audio.eq.band0.label" x="54" y="288" width="32" text="60" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b1" x="92" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band1" x="94" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(1)" points="(0,279),(0,112)" tooltiptext="170 Hz"/>
+        <Text id="sidebar_audio.eq.band1.label" x="78" y="288" width="32" text="170" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b2" x="116" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band2" x="118" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(2)" points="(0,279),(0,112)" tooltiptext="310 Hz"/>
+        <Text id="sidebar_audio.eq.band2.label" x="102" y="288" width="32" text="310" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b3" x="140" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band3" x="142" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(3)" points="(0,279),(0,112)" tooltiptext="600 Hz"/>
+        <Text id="sidebar_audio.eq.band3.label" x="126" y="288" width="32" text="600" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b4" x="164" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band4" x="166" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(4)" points="(0,279),(0,112)" tooltiptext="1k Hz"/>
+        <Text id="sidebar_audio.eq.band4.label" x="150" y="288" width="32" text="1k" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b5" x="188" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band5" x="190" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(5)" points="(0,279),(0,112)" tooltiptext="3k Hz"/>
+        <Text id="sidebar_audio.eq.band5.label" x="174" y="288" width="32" text="3k" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b6" x="212" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band6" x="214" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(6)" points="(0,279),(0,112)" tooltiptext="6k Hz"/>
+        <Text id="sidebar_audio.eq.band6.label" x="198" y="288" width="32" text="6k" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b7" x="236" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band7" x="238" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(7)" points="(0,279),(0,112)" tooltiptext="12k Hz"/>
+        <Text id="sidebar_audio.eq.band7.label" x="222" y="288" width="32" text="12k" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b8" x="260" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band8" x="262" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(8)" points="(0,279),(0,112)" tooltiptext="14k Hz"/>
+        <Text id="sidebar_audio.eq.band8.label" x="246" y="288" width="32" text="14k" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Image id="sidebar_audio.eq.track.b9" x="284" y="112" width="6" height="168" image="eq.track"/>
+        <Slider id="sidebar_audio.eq.band9" x="286" y="0" up="eq.knob.normal" down="eq.knob.down" over="eq.knob.over" value="equalizer.band(9)" points="(0,279),(0,112)" tooltiptext="16k Hz"/>
+        <Text id="sidebar_audio.eq.band9.label" x="270" y="288" width="32" text="16k" font="font.small" color="#888888" alignment="center" focus="false"/>
+        <Text id="sidebar_audio.eq.info.bitrate" x="16" y="328" width="288" text="Bitrate: $B kb/s" font="defaultfont" color="#888888" focus="false"/>
+        <Text id="sidebar_audio.eq.info.rate" x="16" y="346" width="288" text="Sample rate: $S Hz" font="defaultfont" color="#888888" focus="false"/>
       </Panel>
-      <Panel id="topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
-        <Image id="topbar.bg" x="0" y="0" width="1100" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
-        <Image id="topbar.edge" x="0" y="39" width="1100" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Image id="topbar.logo" x="16" y="9" width="22" height="22" image="logo"/>
-        <Button id="topbar.menu" x="48" y="4" up="icons.menu.normal" down="icons.menu.down" over="icons.menu.over" action="main_menu.show()" tooltiptext="Main menu"/>
-        <Button id="topbar.folder" x="88" y="4" up="icons.folder.normal" down="icons.folder.down" over="icons.folder.over" action="dialogs.playlist()" tooltiptext="Show the playlist"/>
-        <Text id="topbar.crumb" x="128" y="13" width="320" text="$N" font="defaultfont" color="#888888" scrolling="auto" focus="false"/>
-        <Text id="topbar.info" x="728" y="13" width="220" lefttop="righttop" rightbottom="righttop" text="$B kb/s   $S Hz" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-        <Button id="win.min" x="968" y="4" lefttop="righttop" rightbottom="righttop" up="icons.win_min.normal" down="icons.win_min.down" over="icons.win_min.over" action="vlc.minimize()" tooltiptext="Minimise"/>
-        <Checkbox id="win.max" x="1012" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
-        <Button id="win.close" x="1056" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
+      <Panel id="sidebar_audio.topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
+        <Image id="sidebar_audio.topbar.bg" x="0" y="0" width="1280" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
+        <Image id="sidebar_audio.topbar.edge" x="0" y="39" width="1280" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+        <Image id="sidebar_audio.topbar.logo" x="16" y="9" width="22" height="22" image="logo"/>
+        <Button id="sidebar_audio.topbar.menu" x="48" y="4" up="icons.menu.normal" down="icons.menu.down" over="icons.menu.over" action="main_menu.show()" tooltiptext="Main menu"/>
+        <Button id="sidebar_audio.topbar.folder" x="88" y="4" up="icons.folder.normal" down="icons.folder.down" over="icons.folder.over" action="dialogs.playlist()" tooltiptext="Show the playlist"/>
+        <Text id="sidebar_audio.topbar.crumb" x="128" y="13" width="320" text="$N" font="defaultfont" color="#888888" scrolling="auto" focus="false"/>
+        <Text id="sidebar_audio.topbar.info" x="908" y="13" width="220" lefttop="righttop" rightbottom="righttop" text="$B kb/s   $S Hz" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+        <Button id="sidebar_audio.win.min" x="1148" y="4" lefttop="righttop" rightbottom="righttop" up="icons.win_min.normal" down="icons.win_min.down" over="icons.win_min.over" action="vlc.minimize()" tooltiptext="Minimise"/>
+        <Checkbox id="sidebar_audio.win.max" x="1192" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
+        <Button id="sidebar_audio.win.close" x="1236" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
       </Panel>
-      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
-      <Image id="grip.s" x="0" y="674" width="1086" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
-      <Image id="grip.se" x="1086" y="666" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
+      <Image id="sidebar_audio.grip.e" x="1274" y="40" width="6" height="754" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
+      <Image id="sidebar_audio.grip.s" x="0" y="794" width="1266" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
+      <Image id="sidebar_audio.grip.se" x="1266" y="786" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
     </Layout>
   </Window>
   <Window id="miniwin" x="240" y="160" visible="false">
     <Layout id="mini" width="340" height="236" minwidth="340" maxwidth="340" minheight="236" maxheight="236">
-      <Image id="mini.bg" x="0" y="0" width="340" height="236" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
-      <Video id="mini.video" x="0" y="0" width="340" height="166" visible="vlc.hasVout"/>
-      <Button id="mini.prev" x="16" y="194" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()"/>
-      <Checkbox id="mini.play" x="56" y="190" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
-      <Button id="mini.next" x="128" y="194" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()"/>
-      <Button id="mini.fs" x="252" y="194" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
-      <Button id="mini.close" x="300" y="194" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="miniwin.hide()" tooltiptext="Close mini player"/>
-      <Text id="mini.title" x="16" y="172" width="308" text="$N" font="defaultfont" color="#FFFFFF" scrolling="auto" focus="false"/>
+      <Image id="mini.mini.bg" x="0" y="0" width="340" height="236" rightbottom="rightbottom" image="solid.primary" resize="scale" action="move"/>
+      <Video id="mini.mini.video" x="0" y="0" width="340" height="166" visible="vlc.hasVout"/>
+      <Button id="mini.mini.prev" x="16" y="194" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()"/>
+      <Checkbox id="mini.mini.play" x="56" y="190" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()" tooltiptext1="Pause" tooltiptext2="Play"/>
+      <Button id="mini.mini.next" x="128" y="194" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()"/>
+      <Button id="mini.mini.fs" x="252" y="194" lefttop="righttop" rightbottom="righttop" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Fullscreen"/>
+      <Button id="mini.mini.close" x="300" y="194" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="miniwin.hide()" tooltiptext="Close mini player"/>
+      <Text id="mini.mini.title" x="16" y="172" width="308" text="$N" font="defaultfont" color="#FFFFFF" scrolling="auto" focus="false"/>
     </Layout>
   </Window>
   <Window id="fullscreenController" position="South" ymargin="3%">
     <Layout id="fsc" width="1020" height="88" minwidth="1020" maxwidth="1020" minheight="88" maxheight="88">
-      <Image id="fsc.bg" x="0" y="0" width="1020" height="88" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
-      <Image id="fsc.edge" x="0" y="0" width="1020" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-      <Button id="fsc.prev" x="24" y="28" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()"/>
-      <Checkbox id="fsc.play" x="64" y="24" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()"/>
-      <Button id="fsc.next" x="144" y="28" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()"/>
-      <Text id="fsc.time" x="188" y="37" width="60" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
-      <Slider id="fsc.seek" x="256" y="41" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(419,3)">
-        <SliderBackground id="fsc.seek.bg" image="seek.strip.fsc" nbhoriz="61"/>
+      <Image id="fsc.fsc.bg" x="0" y="0" width="1020" height="88" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
+      <Image id="fsc.fsc.edge" x="0" y="0" width="1020" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
+      <Button id="fsc.fsc.prev" x="24" y="28" up="btn.prev.normal" down="btn.prev.down" over="btn.prev.over" action="playlist.previous()"/>
+      <Checkbox id="fsc.fsc.play" x="64" y="24" up1="btn.pause.normal" down1="btn.pause.down" over1="btn.pause.over" up2="btn.play.normal" down2="btn.play.down" over2="btn.play.over" state="vlc.isPlaying" action1="vlc.pause()" action2="vlc.play()"/>
+      <Button id="fsc.fsc.next" x="144" y="28" up="btn.next.normal" down="btn.next.down" over="btn.next.over" action="playlist.next()"/>
+      <Text id="fsc.fsc.time" x="188" y="37" width="60" text="$T" font="defaultfont" color="#FFFFFF" focus="false"/>
+      <Slider id="fsc.fsc.seek" x="256" y="41" up="seek.cursor.normal" down="seek.cursor.down" over="seek.cursor.over" value="time" points="(0,3),(419,3)">
+        <SliderBackground id="fsc.fsc.seek.bg" image="seek.strip.fsc" nbhoriz="61"/>
       </Slider>
-      <Text id="fsc.total" x="684" y="37" width="60" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
-      <Checkbox id="fsc.mute" x="756" y="28" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()"/>
-      <Slider id="fsc.volume" x="796" y="36" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)">
-        <SliderBackground id="fsc.volume.bg" image="vol.strip" nbhoriz="41"/>
+      <Text id="fsc.fsc.total" x="684" y="37" width="60" text="$D" font="defaultfont" color="#888888" alignment="right" focus="false"/>
+      <Checkbox id="fsc.fsc.mute" x="756" y="28" up1="icons.mute.on.normal" down1="icons.mute.on.down" over1="icons.mute.on.over" up2="icons.mute.normal" down2="icons.mute.down" over2="icons.mute.over" state="vlc.isMute" action1="vlc.mute()" action2="vlc.mute()"/>
+      <Slider id="fsc.fsc.volume" x="796" y="36" up="vol.cursor.normal" down="vol.cursor.down" over="vol.cursor.over" value="volume" points="(0,8),(119,8)">
+        <SliderBackground id="fsc.fsc.volume.bg" image="vol.strip" nbhoriz="41"/>
       </Slider>
-      <Button id="fsc.exit" x="924" y="28" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Exit fullscreen"/>
-      <Button id="fsc.close" x="964" y="28" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="fullscreenController.hide()" tooltiptext="Hide controls"/>
+      <Button id="fsc.fsc.exit" x="924" y="28" up="icons.fullscreen.normal" down="icons.fullscreen.down" over="icons.fullscreen.over" action="vlc.fullscreen()" tooltiptext="Exit fullscreen"/>
+      <Button id="fsc.fsc.close" x="964" y="28" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="fullscreenController.hide()" tooltiptext="Hide controls"/>
     </Layout>
   </Window>
 </Theme>

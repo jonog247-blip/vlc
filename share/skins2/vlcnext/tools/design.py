@@ -73,8 +73,8 @@ BAR_H = 96         # section 2.3 -- two row control bar
 SIDEBAR_W = 320        # section 3.2 -- right hand drawer
 TAB_H = 56         # drawer tab strip
 
-MAIN_W = 1100        # main window, "normal" layout
-MAIN_H = 680
+MAIN_W = 1280        # main window, "normal" layout
+MAIN_H = 800
 SIDE_W = MAIN_W + SIDEBAR_W      # kept for reference: the drawer is 320 wide
 SIDE_H = MAIN_H
 

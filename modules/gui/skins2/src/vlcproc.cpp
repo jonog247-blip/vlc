@@ -713,6 +713,28 @@ void VlcProc::on_capabilities_changed( vlc_value_t newVal )
 void VlcProc::on_position_changed( vlc_value_t newVal )
 {
     float pos = newVal.f_float;
+
+    /* The demuxer reports the playback position as i_pcr / i_duration.  That
+     * is only exact when the container starts at timestamp 0: for files whose
+     * first timestamp is far from zero (many MKVs, remuxes, broadcast
+     * captures) the ratio is far bigger than the elapsed/duration ratio the
+     * skin displays next to the slider, so a stream that has just started
+     * shows a bar that is nearly full.
+     *
+     * Recompute the position from the player's time and length so the slider,
+     * the "$T"/"$D" readouts and the seek target all use the same scale. */
+    vlc_player_t *player = vlc_playlist_GetPlayer( getPL() );
+    if( player )
+    {
+        vlc_playlist_Lock( getPL() );
+        vlc_tick_t time = vlc_player_GetTime( player );
+        vlc_tick_t length = vlc_player_GetLength( player );
+        vlc_playlist_Unlock( getPL() );
+
+        if( time != VLC_TICK_INVALID && length > 0 )
+            pos = (float)( (double)time / (double)length );
+    }
+
     SET_STREAMTIME( m_cVarTime, pos, false );
 }
 

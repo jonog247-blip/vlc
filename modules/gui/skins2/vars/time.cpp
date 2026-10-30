@@ -48,7 +48,21 @@ void StreamTime::set( float percentage, bool updateVLC )
     {
         vlc_player_t *player = vlc_playlist_GetPlayer( getPL() );
         vlc_playlist_Lock( getPL() );
-        vlc_player_SetPosition( player, percentage );
+
+        /* Seek by time, not by position.  vlc_player_SetPosition() goes
+         * through the demuxer's own position scale, which for containers that
+         * do not start at timestamp 0 is not the same as time / length.
+         * Using the length keeps a click at 30% of the (visible) slider at
+         * 30% of the duration, and it stays consistent with the position
+         * VlcProc::on_position_changed() computes from the same values. */
+        vlc_tick_t length = vlc_player_GetLength( player );
+        if( length > 0 )
+            vlc_player_SetTime( player,
+                                (vlc_tick_t)( (double)percentage *
+                                              (double)length ) );
+        else
+            vlc_player_SetPosition( player, percentage );
+
         vlc_playlist_Unlock( getPL() );
     }
 }
