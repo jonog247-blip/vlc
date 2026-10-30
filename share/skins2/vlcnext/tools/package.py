@@ -16,8 +16,14 @@ the layout inside is simply:
     theme.xml
     vlcnext/*.png
     vlcnext/FreeSans*.ttf
+
+The archive is reproducible: timestamps and ownership are zeroed, so
+rebuilding an unchanged skin gives a byte identical .vlt and does not dirty
+the working tree.
 """
 
+import gzip
+import io
 import os
 import sys
 import tarfile
@@ -37,11 +43,22 @@ def main():
 
     vlt = os.path.join(SKIN, NAME + ".vlt")
     tmp = vlt + ".tmp"
-    with tarfile.open(tmp, "w:gz", format=tarfile.USTAR_FORMAT) as tar:
-        tar.add(theme, arcname="theme.xml")
+
+    def fixed(info):
+        info.mtime = 0
+        info.uid = info.gid = 0
+        info.uname = info.gname = ""
+        return info
+
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w", format=tarfile.USTAR_FORMAT) as tar:
+        tar.add(theme, arcname="theme.xml", filter=fixed)
         for name in sorted(os.listdir(ASSETS)):
             tar.add(os.path.join(ASSETS, name),
-                    arcname="%s/%s" % (NAME, name))
+                    arcname="%s/%s" % (NAME, name), filter=fixed)
+    with open(tmp, "wb") as fh:
+        with gzip.GzipFile(fileobj=fh, mode="wb", mtime=0) as gz:
+            gz.write(buf.getvalue())
     os.replace(tmp, vlt)
 
     print("wrote %s (%d files, %.1f KB)"
