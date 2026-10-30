@@ -640,6 +640,7 @@ def drawer(kind, W, H):
         list_y = D.TAB_H + D.SB_PAD
         list_h = dh - list_y - 64
         p.child(Playlist("queue.list", 8, list_y, D.SIDEBAR_W - 16, list_h,
+                         rightbottom="rightbottom",
                          fgcolor=D.hexc(D.TEXT_PRIMARY),
                          playcolor=D.hexc(D.ACCENT),
                          bgcolor1=D.hexc(D.BG_SECONDARY),
@@ -653,10 +654,13 @@ def drawer(kind, W, H):
             bx = 16 + i * 100
             p.child(Button("queue.%s" % label.lower(),
                            "btn.rect.normal", "btn.rect.down",
-                           "btn.rect.over", action, bx, fy))
+                           "btn.rect.over", action, bx, fy,
+                           lefttop="leftbottom", rightbottom="rightbottom"))
             p.child(Text("queue.%s.label" % label.lower(), label, bx, fy + 7,
                          88, color=D.hexc(D.TEXT_PRIMARY),
-                         alignment="center", focus="false"))
+                         alignment="center", focus="false",
+                         lefttop="leftbottom",
+                         rightbottom="rightbottom"))
     else:
         # ---- equalizer (section 3.3) ---------------------------------
         p.child(Text("eq.title", "Equalizer", D.SB_PAD, D.TAB_H + 14, 200,
@@ -739,7 +743,7 @@ def resize_grips(W, H):
     out.append(Image_("grip.e", W - 6, D.TOPBAR_H, 6,
                       H - D.TOPBAR_H - 6, bitmap="grip.e",
                       resize="scale", action="resizeE",
-                      lefttop="righttop", rightbottom="righttop"))
+                      lefttop="righttop", rightbottom="rightbottom"))
     out.append(Image_("grip.s", 0, H - 6, W - 14, 6, bitmap="grip.s",
                       resize="scale", action="resizeS",
                       lefttop="leftbottom", rightbottom="rightbottom"))

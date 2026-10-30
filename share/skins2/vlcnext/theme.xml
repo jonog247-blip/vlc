@@ -234,7 +234,7 @@
         <Checkbox id="win.max" x="1012" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
         <Button id="win.close" x="1056" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
       </Panel>
-      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="righttop" image="grip.e" resize="scale" action="resizeE"/>
+      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
       <Image id="grip.s" x="0" y="674" width="1086" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
       <Image id="grip.se" x="1086" y="666" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
     </Layout>
@@ -276,13 +276,13 @@
         <Text id="tab.audio.label.off" x="116" y="22" width="88" visible="not sidebar_audio.isActive" text="Audio" font="font.bold" color="#888888" alignment="center" focus="false"/>
         <Button id="drawer.close" x="280" y="12" lefttop="righttop" rightbottom="righttop" up="icons.close.normal" down="icons.close.down" over="icons.close.over" action="main.setLayout(normal)" tooltiptext="Close panel"/>
         <Image id="drawer.divider" x="0" y="56" width="320" height="1" rightbottom="righttop" image="border.h" resize="scale"/>
-        <Playlist id="queue.list" x="8" y="72" width="304" height="504" font="defaultfont" fgcolor="#FFFFFF" playcolor="#E07A1E" bgcolor1="#1A1A1A" bgcolor2="#1A1A1A" selcolor="#2F2F2F"/>
-        <Button id="queue.add" x="16" y="596" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.add()"/>
-        <Text id="queue.add.label" x="16" y="603" width="88" text="Add" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
-        <Button id="queue.remove" x="116" y="596" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.del()"/>
-        <Text id="queue.remove.label" x="116" y="603" width="88" text="Remove" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
-        <Button id="queue.sort" x="216" y="596" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.sort()"/>
-        <Text id="queue.sort.label" x="216" y="603" width="88" text="Sort" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
+        <Playlist id="queue.list" x="8" y="72" width="304" height="504" rightbottom="rightbottom" font="defaultfont" fgcolor="#FFFFFF" playcolor="#E07A1E" bgcolor1="#1A1A1A" bgcolor2="#1A1A1A" selcolor="#2F2F2F"/>
+        <Button id="queue.add" x="16" y="596" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.add()"/>
+        <Text id="queue.add.label" x="16" y="603" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Add" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
+        <Button id="queue.remove" x="116" y="596" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.del()"/>
+        <Text id="queue.remove.label" x="116" y="603" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Remove" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
+        <Button id="queue.sort" x="216" y="596" lefttop="leftbottom" rightbottom="rightbottom" up="btn.rect.normal" down="btn.rect.down" over="btn.rect.over" action="playlist.sort()"/>
+        <Text id="queue.sort.label" x="216" y="603" width="88" lefttop="leftbottom" rightbottom="rightbottom" text="Sort" font="defaultfont" color="#FFFFFF" alignment="center" focus="false"/>
       </Panel>
       <Panel id="topbar" x="0" y="0" width="0" height="40" rightbottom="righttop">
         <Image id="topbar.bg" x="0" y="0" width="1100" height="40" rightbottom="rightbottom" image="solid.secondary" resize="scale" action="move"/>
@@ -296,7 +296,7 @@
         <Checkbox id="win.max" x="1012" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
         <Button id="win.close" x="1056" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
       </Panel>
-      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="righttop" image="grip.e" resize="scale" action="resizeE"/>
+      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
       <Image id="grip.s" x="0" y="674" width="1086" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
       <Image id="grip.se" x="1086" y="666" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
     </Layout>
@@ -388,7 +388,7 @@
         <Checkbox id="win.max" x="1012" y="4" lefttop="righttop" rightbottom="righttop" up1="icons.win_unmax.normal" down1="icons.win_unmax.down" over1="icons.win_unmax.over" up2="icons.win_max.normal" down2="icons.win_max.down" over2="icons.win_max.over" state="main.isMaximized()" action1="main.unmaximize()" action2="main.maximize()" tooltiptext1="Restore" tooltiptext2="Maximise"/>
         <Button id="win.close" x="1056" y="0" lefttop="righttop" rightbottom="righttop" up="icons.win_close.normal" down="icons.win_close.down" over="icons.win_close.over" action="vlc.quit()" tooltiptext="Quit VLC"/>
       </Panel>
-      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="righttop" image="grip.e" resize="scale" action="resizeE"/>
+      <Image id="grip.e" x="1094" y="40" width="6" height="634" lefttop="righttop" rightbottom="rightbottom" image="grip.e" resize="scale" action="resizeE"/>
       <Image id="grip.s" x="0" y="674" width="1086" height="6" lefttop="leftbottom" rightbottom="rightbottom" image="grip.s" resize="scale" action="resizeS"/>
       <Image id="grip.se" x="1086" y="666" width="14" height="14" lefttop="rightbottom" rightbottom="rightbottom" image="grip.se" action="resizeSE"/>
     </Layout>

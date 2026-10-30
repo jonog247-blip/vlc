@@ -450,12 +450,13 @@ def check_geometry(theme, report):
 
 
 def check_resize(theme, report):
-    """Every resizable layout must still hold together after a resize.
+    """Every resizable layout must still hold together at another size.
 
     skins2 re-runs Position for every control when the window grows, so a
     control anchored to the wrong corner drifts, collides with its neighbour or
     slides under the drawer.  Nothing about the XML *looks* wrong at the design
-    size, which is exactly why this has to be tested at another size.
+    size, which is exactly why this has to be tested at other sizes: once
+    larger (the user maximises) and once at the layout's own minimum.
     """
     checked = 0
     for wid, wattr, layouts in theme.windows:
@@ -468,47 +469,68 @@ def check_resize(theme, report):
             for n in walk(l):
                 if n is not l:
                     design.setdefault(n.id, n.rect)
-            NW, NH = LW + RESIZE[0], LH + RESIZE[1]
-            relayout(l, (0, 0, NW, NH))
-            nodes = list(walk(l))[1:]
+            sizes = [RESIZE,
+                     (int(l.attrs["minwidth"]) - LW,
+                      int(l.attrs["minheight"]) - LH)]
+            for delta in sizes:
+                NW, NH = LW + delta[0], LH + delta[1]
+                relayout(l, (0, 0, NW, NH))
+                nodes = list(walk(l))[1:]
+                tag = "%+dx%+d" % delta
 
-            for n in nodes:
-                x, y, w, h = n.rect
-                if x < -2 or y < -2 or x + w > NW + 2 or y + h > NH + 2:
-                    report.error("layout %s resized: %s %s leaves the window "
-                                 "(rect %s)" % (lid, n.tag, n.id, n.rect))
-
-            drawers = [n for n in nodes if n.id == "drawer"]
-            if drawers:
-                drawer = drawers[0]
-                dx, dw = drawer.rect[0], drawer.rect[2]
-                if abs(dw - design["drawer"][2]) > 1 or                         abs(dx - (NW - design["drawer"][2])) > 1:
-                    report.error("layout %s resized: drawer is %s, expected "
-                                 "the same %dpx pinned to the right edge"
-                                 % (lid, drawer.rect, design["drawer"][2]))
-                inner = set(id(n) for n in walk(drawer))
                 for n in nodes:
-                    if id(n) in inner or n.tag not in CLICKABLE:
-                        continue
-                    if not overlaps(hit_rect(theme, n), drawer.rect):
-                        continue
-                    report.error("layout %s resized: %s %s runs under the "
-                                 "drawer (rect %s, drawer starts at %d)"
-                                 % (lid, n.tag, n.id, n.rect, dx))
+                    x, y, w, h = n.rect
+                    if x < -2 or y < -2 or x + w > NW + 2 or y + h > NH + 2:
+                        report.error("layout %s at %s: %s %s leaves the "
+                                     "window (rect %s)"
+                                     % (lid, tag, n.tag, n.id, n.rect))
 
-            # a slider anchored on both sides has to absorb the whole delta
-            if "seek" in design:
+                click = [n for n in nodes if n.tag in CLICKABLE and
+                         n.attrs.get("visible") in (None, "true")]
+                for i in range(len(click)):
+                    for j in range(i + 1, len(click)):
+                        if overlaps(hit_rect(theme, click[i]),
+                                    hit_rect(theme, click[j])):
+                            report.error("layout %s at %s: %s %s overlaps "
+                                         "%s %s" % (lid, tag, click[i].tag,
+                                                    click[i].id, click[j].tag,
+                                                    click[j].id))
+
+                drawers = [n for n in nodes if n.id == "drawer"]
+                if drawers:
+                    drawer = drawers[0]
+                    dx, dw = drawer.rect[0], drawer.rect[2]
+                    if abs(dw - design["drawer"][2]) > 1 or \
+                            abs(dx - (NW - design["drawer"][2])) > 1:
+                        report.error("layout %s at %s: the drawer is %s, "
+                                     "expected the same %dpx pinned to the "
+                                     "right edge" % (lid, tag, drawer.rect,
+                                                     design["drawer"][2]))
+                    inner = set(id(n) for n in walk(drawer))
+                    for n in nodes:
+                        if id(n) in inner or n.tag not in CLICKABLE:
+                            continue
+                        if overlaps(hit_rect(theme, n), drawer.rect):
+                            report.error("layout %s at %s: %s %s runs under "
+                                         "the drawer (rect %s, drawer starts "
+                                         "at %d)" % (lid, tag, n.tag, n.id,
+                                                     n.rect, dx))
+
+                # a slider anchored on both sides has to absorb the delta
                 for n in nodes:
-                    if n.id != "seek":
+                    if n.id != "seek" or n.tag != "Slider":
                         continue
-                    want = design["seek"][2] + RESIZE[0]
-                    if abs(n.rect[2] - want) > 3:
-                        report.error("layout %s resized: seek is %dpx wide, "
-                                     "expected %d" % (lid, n.rect[2], want))
-            relayout(l, (0, 0, LW, LH))
-            checked += 1
-    report.note("geometry re-checked at +%dx+%d on %d layouts"
-                % (RESIZE[0], RESIZE[1], checked))
+                    want = design["seek"][2] + delta[0]
+                    if delta[0] > 0 and abs(n.rect[2] - want) > 3:
+                        report.error("layout %s at %s: seek is %dpx wide, "
+                                     "expected %d" % (lid, tag, n.rect[2],
+                                                      want))
+                relayout(l, (0, 0, LW, LH))
+                checked += 1
+    report.note("geometry re-checked at +%dx+%d and at the minimum size "
+                "on %d layouts" % (RESIZE[0], RESIZE[1], checked))
+
+
 
 
 def walk(node):
@@ -522,15 +544,22 @@ def hit_rect(theme, node):
     """The area of a control that actually takes the mouse."""
     if node.tag != "Slider":
         return node.rect
+    # the curve is the hit area, grown by the cursor bitmap; the points are
+    # written in the parent's coordinates and scale with the control, which is
+    # how skins2 stretches a slider when the window is resized
     pts = parse_points(node.attrs.get("points"))
     if not pts:
         return node.rect
     xs = [p[0] for p in pts]
     ys = [p[1] for p in pts]
     kw, kh = theme.bitmap_size(node.attrs.get("up"))
-    x, y, _, _ = node.rect
-    return (x + min(xs) - kw // 2, y + min(ys) - kh // 2,
-            (max(xs) - min(xs)) + kw, (max(ys) - min(ys)) + kh)
+    x, y, w, h = node.rect
+    sx = w / float(max(xs) + 1) if max(xs) >= 0 else 1.0
+    sy = h / float(max(ys) + 1) if max(ys) >= 0 else 1.0
+    x0 = x + min(xs) * sx
+    y0 = y + min(ys) * sy
+    return (x0 - kw // 2, y0 - kh // 2,
+            (max(xs) - min(xs)) * sx + kw, (max(ys) - min(ys)) * sy + kh)
 
 
 def overlaps(r1, r2, slack=0):

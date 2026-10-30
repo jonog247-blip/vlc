@@ -135,10 +135,13 @@ Editing workflow:
    shapes the window from the painted alpha channel: one unpainted pixel is a
    see-through hole to the desktop. This is what catches a stretched 8×8
    swatch whose last row was left semi-transparent by the resampler;
-9. re-runs `Position` for every control at a window 320×180 larger
-   (`relayout()`) and re-checks containment, overlap and the drawer edge,
-   because an anchor that is wrong is invisible at the design size and only
-   shows up when the user drags the window corner.
+9. re-runs `Position` for every control (`relayout()`) at a window 320×180
+   larger *and* at the layout's own minimum size, then re-checks containment,
+   click target overlap, the drawer's width and edge, and that the seek bar
+   absorbed the width delta. An anchor that is wrong is invisible at the
+   design size and only shows up when the user drags the window corner — this
+   is what caught the queue list and its footer buttons not following the
+   bottom of the drawer.
 
 ## Files
 
