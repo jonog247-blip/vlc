@@ -75,10 +75,11 @@ TAB_H = 56         # drawer tab strip
 
 MAIN_W = 1100        # main window, "normal" layout
 MAIN_H = 680
-SIDE_W = MAIN_W + SIDEBAR_W      # main window, drawer open (1420)
+SIDE_W = MAIN_W + SIDEBAR_W      # kept for reference: the drawer is 320 wide
 SIDE_H = MAIN_H
 
-MIN_W = 820        # resizing limits
+
+MIN_W = 1000       # resizing limits (the control bar needs >= 1000px)
 MIN_H = 520
 MAX_W = 99999
 MAX_H = 99999
@@ -99,6 +100,12 @@ PLAY_H = 40
 
 SEEK_X = 266        # seekbar starts after the elapsed time readout
 SEEK_RIGHT_GAP = 100      # gap between the seekbar and the window edge
+
+# The seek strip is a sprite sheet whose frames must be exactly as wide
+# as the slider's Bezier curve at the design size; the drawer layouts have
+# a 320px narrower video column, so they need their own strip.
+SEEK_W = MAIN_W - SEEK_X - SEEK_RIGHT_GAP
+SEEK_W_DRAWER = MAIN_W - SIDEBAR_W - SEEK_X - SEEK_RIGHT_GAP
 TIME_W = 70
 TOTAL_TIME_W = 68
 
@@ -145,25 +152,25 @@ EQ_BOTTOM = 280
 EQ_TRACK_H = EQ_BOTTOM - EQ_TOP        # travel of the band sliders
 EQ_KNOB_W = 22
 EQ_KNOB_H = 10
-EQ_BAND_X0 = 76
-EQ_BAND_STEP = 22
-EQ_PREAMP_X = 44
+EQ_BAND_X0 = 70
+EQ_BAND_STEP = 24
+EQ_PREAMP_X = 34
 EQ_BANDS = ["60", "170", "310", "600", "1k", "3k", "6k", "12k", "14k", "16k"]
 
 # Mini player (section 4.2)
 MINI_W = 340
 MINI_H = 236
-MINI_VIDEO_H = 180
+MINI_VIDEO_H = 166
 
 # Fullscreen controller (FscWindow, fades out automatically).  Fixed size, so
 # every coordinate below is an absolute left/top offset.
 FSC_W = 1020
 FSC_H = 88
 FSC_MARGIN = 24
-FSC_ROW_CY = 34        # vertical centre of the control row
-FSC_TIME_X = 176
-FSC_TIME_W = 64
-FSC_SEEK_X = 248
+FSC_ROW_CY = 44        # vertical centre of the control row (88px tall)
+FSC_TIME_X = 188
+FSC_TIME_W = 60
+FSC_SEEK_X = 256
 FSC_SEEK_W = 420       # its own sprite strip: see SEEK_FRAMES
 FSC_TOTAL_X = 684
 FSC_MUTE_X = 756

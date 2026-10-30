@@ -330,10 +330,24 @@ def build_bitmaps():
                                                    paused=True))
     bm.add_sheet("pause.png", pause)
 
+    # --- video canvas -----------------------------------------------------
+    # skins2 draws an Image at the size of its *bitmap* unless width/height
+    # are given, and CtrlImage::kScaleAndRatioPreserved (resize="scale2")
+    # never enlarges/stretches: it letterboxes the bitmap inside the control.
+    # A tiny 8x8 "solid" placeholder would therefore be blown up to a square
+    # and centred in the canvas (visible as a dark block).  Give the canvas
+    # placeholder exactly the size and aspect ratio of the video area so that
+    # it fills the canvas and album art is letterboxed over it.
+    video_h = D.MAIN_H - D.TOPBAR_H - D.BAR_H
+    bm.add_file("video.placeholder", "video.png",
+                art.solid(D.MAIN_W, video_h, D.BG_PRIMARY))
+
     # --- slider strips ----------------------------------------------------
-    seek_w = D.MAIN_W - D.SEEK_X - D.SEEK_RIGHT_GAP
+    seek_w = D.SEEK_W
     bm.add_file("seek.strip", "seek_strip.png",
                 art.seek_strip(seek_w, D.SEEK_TRACK_H, D.SEEK_FRAMES))
+    bm.add_file("seek.strip.drawer", "seek_strip_drawer.png",
+                art.seek_strip(D.SEEK_W_DRAWER, D.SEEK_TRACK_H, D.SEEK_FRAMES))
     bm.add_file("seek.strip.fsc", "seek_strip_fsc.png",
                 art.seek_strip(D.FSC_SEEK_W, D.SEEK_TRACK_H, D.SEEK_FRAMES))
     bm.add_file("vol.strip", "vol_strip.png",
@@ -361,26 +375,18 @@ def switch(state, on):
 
 
 def grip_e(w, h):
-    img = art.canvas(w, h)
-    d = __import__("PIL.ImageDraw", fromlist=["ImageDraw"]).Draw(img)
-    art.rrect(d, (w - 3, h * 0.25, w - 1, h * 0.75), 1, fill=D.BORDER)
-    return art.finish(img, w, h)
+    """Invisible resize handle: the edges of a modern window do not advertise
+    themselves with a grip. CtrlImage draws nothing when the bitmap is empty,
+    so the pixel underneath (an opaque background) is what the window shows."""
+    return art.canvas(w, h)
 
 
 def grip_s(w, h):
-    img = art.canvas(w, h)
-    d = __import__("PIL.ImageDraw", fromlist=["ImageDraw"]).Draw(img)
-    art.rrect(d, (w * 0.25, h - 3, w * 0.75, h - 1), 1, fill=D.BORDER)
-    return art.finish(img, w, h)
+    return art.canvas(w, h)
 
 
 def grip_se(w, h):
-    img = art.canvas(w, h)
-    d = __import__("PIL.ImageDraw", fromlist=["ImageDraw"]).Draw(img)
-    for i in range(3):
-        o = i * 4
-        art.line(d, [(w - 3 - o, h - 1), (w - 1, h - 3 - o)], D.BORDER, 1)
-    return art.finish(img, w, h)
+    return art.canvas(w, h)
 
 
 # ---------------------------------------------------------------------------
@@ -388,12 +394,19 @@ def grip_se(w, h):
 # ---------------------------------------------------------------------------
 
 def top_bar(W, with_close=True):
-    """Section 2.2: cone, unified "..." menu, breadcrumb, window controls."""
+    """Section 2.2: cone, unified "..." menu, breadcrumb, window controls.
+
+    The panel has width 0 on purpose: skins2 resolves the panel box against
+    the layout, so a zero-width right-anchored panel grows exactly by the
+    amount the window was widened and every right-anchored child keeps
+    following the right edge.  Images, however, are *not* auto-stretched
+    (width defaults to the bitmap size), so their widths are spelled out.
+    """
     p = Panel("topbar", 0, 0, 0, D.TOPBAR_H, rightbottom="righttop")
-    p.child(Image_("topbar.bg", 0, 0, 0, D.TOPBAR_H,
+    p.child(Image_("topbar.bg", 0, 0, W, D.TOPBAR_H,
                    bitmap="solid.secondary", resize="scale",
-                   rightbottom="righttop", action="move"))
-    p.child(Image_("topbar.edge", 0, D.TOPBAR_H - 1, 0, 1, bitmap="border.h",
+                   rightbottom="rightbottom", action="move"))
+    p.child(Image_("topbar.edge", 0, D.TOPBAR_H - 1, W, 1, bitmap="border.h",
                    resize="scale", rightbottom="righttop"))
     p.child(Image_("topbar.logo", D.LOGO_X,
                    (D.TOPBAR_H - D.LOGO_SIZE) // 2, D.LOGO_SIZE, D.LOGO_SIZE,
@@ -403,9 +416,12 @@ def top_bar(W, with_close=True):
                    D.MENU_X, (D.TOPBAR_H - D.MENU_SIZE) // 2,
                    tooltiptext="Main menu"))
     # breadcrumb: folder glyph + media name (section 2.2)
-    p.child(Image_("topbar.folder", D.CRUMB_X, 12, 16, 16,
-                   bitmap="icons.folder.normal", resize="scale"))
-    p.child(Text("topbar.crumb", "$N", D.CRUMB_X + 22, 13, D.CRUMB_W,
+    p.child(Button("topbar.folder", "icons.folder.normal",
+                   "icons.folder.down", "icons.folder.over",
+                   "dialogs.playlist()", D.CRUMB_X,
+                   (D.TOPBAR_H - D.BTN) // 2,
+                   tooltiptext="Show the playlist"))
+    p.child(Text("topbar.crumb", "$N", D.CRUMB_X + D.BTN + 8, 13, D.CRUMB_W,
                  color=D.hexc(D.TEXT_SECOND), scrolling="auto",
                  focus="false"))
     # technical readout, right aligned
@@ -416,7 +432,8 @@ def top_bar(W, with_close=True):
     # window controls
     bx = W - D.WIN_BTN_D
     p.child(Button("win.min", "icons.win_min.normal", "icons.win_min.down",
-                   "icons.win_min.over", "vlc.minimize()", bx, 0,
+                   "icons.win_min.over", "vlc.minimize()", bx,
+                   (D.TOPBAR_H - D.BTN) // 2,
                    lefttop="righttop", rightbottom="righttop",
                    tooltiptext="Minimise"))
     bx += D.WIN_BTN_W
@@ -425,7 +442,8 @@ def top_bar(W, with_close=True):
                      "icons.win_unmax.over",
                      "icons.win_max.normal", "icons.win_max.down",
                      "icons.win_max.over", "main.isMaximized()",
-                     "main.unmaximize()", "main.maximize()", bx, 0,
+                     "main.unmaximize()", "main.maximize()", bx,
+                     (D.TOPBAR_H - D.BTN) // 2,
                      lefttop="righttop", rightbottom="righttop",
                      tooltiptext1="Restore", tooltiptext2="Maximise"))
     bx += D.WIN_BTN_W
@@ -437,14 +455,25 @@ def top_bar(W, with_close=True):
     return p
 
 
-def control_bar(W, H, seek_w, layout_id):
-    """Section 2.3: transport, seek bar, cone volume, utility buttons."""
+def control_bar(W, H, seek_w, layout_id, strip="seek.strip"):
+    """Section 2.3: transport, seek bar, cone volume, utility buttons.
+
+    W is the width of the *video column* (the drawer is not part of the bar).
+    The panel is zero-width and bottom-anchored, so it stretches with the
+    window and its right-anchored children stay glued to the right edge.
+    """
     bar_y = H - D.BAR_H
+    # W is the *video column* width.  The panel width matters: skins2 computes
+    # a right anchored child as  parent.left + parent.width + (x - boxWidth),
+    # where boxWidth is the panel width recorded when the theme was parsed.
+    # Passing 0 would make the bar's right edge the window's right edge, so the
+    # utility cluster would slide under the drawer as soon as the window grows;
+    # passing the video column width keeps it glued to the drawer's left edge.
     p = Panel("bar", 0, bar_y, W, D.BAR_H,
-              lefttop="leftbottom", rightbottom="leftbottom")
+              lefttop="leftbottom", rightbottom="rightbottom")
     p.child(Image_("bar.bg", 0, 0, W, D.BAR_H, bitmap="solid.primary",
                    resize="scale", rightbottom="rightbottom", action="move"))
-    p.child(Image_("bar.edge", 0, 0, 0, 1, bitmap="border.h", resize="scale",
+    p.child(Image_("bar.edge", 0, 0, W, 1, bitmap="border.h", resize="scale",
                    rightbottom="righttop"))
 
     # ---- row 1: transport + time + seek -------------------------------
@@ -471,8 +500,10 @@ def control_bar(W, H, seek_w, layout_id):
                    "(0,3),(%d,3)" % (seek_w - 1),
                    "seek.cursor.normal", "time",
                    down="seek.cursor.down", over="seek.cursor.over",
-                   background="seek.strip", nbimages=D.SEEK_FRAMES,
-                   rightbottom="righttop",
+                   background=strip, nbimages=D.SEEK_FRAMES,
+                   # both ends anchored: the bar stretches with the window
+                   # and CtrlSliderBg scales the strip (ctrl_slider.cpp)
+                   rightbottom="rightbottom",
                    tooltiptext="Seek: $T / $D"))
     total_x = W - D.SEEK_RIGHT_GAP + 8
     p.child(Text("time.total", "$D", total_x, D.ROW1_CY - 7, D.TOTAL_TIME_W,
@@ -480,7 +511,7 @@ def control_bar(W, H, seek_w, layout_id):
                  lefttop="righttop", rightbottom="righttop", focus="false"))
 
     # ---- row 2: title + volume + utility buttons ----------------------
-    p.child(Text("bar.title", "$N", D.TRANSPORT_X, D.ROW2_CY - 8, 620,
+    p.child(Text("bar.title", "$N", D.TRANSPORT_X, D.ROW2_CY - 8, W - 500,
                  font="font.large", color=D.hexc(D.TEXT_PRIMARY),
                  scrolling="auto", rightbottom="righttop", focus="false"))
 
@@ -582,38 +613,44 @@ def drawer_tabs(W, active):
                       D.SIDEBAR_W - D.CLOSE_D, 12,
                       lefttop="righttop", rightbottom="righttop",
                       tooltiptext="Close panel"))
-    out.append(Image_("drawer.divider", 0, D.TAB_H, 0, 1, bitmap="border.h",
-                      resize="scale", rightbottom="righttop"))
+    out.append(Image_("drawer.divider", 0, D.TAB_H, D.SIDEBAR_W, 1,
+                      bitmap="border.h", resize="scale",
+                      rightbottom="righttop"))
     return out
 
 
 def drawer(kind, W, H):
-    """The right hand drawer: Queue (3.4) or Audio/equalizer (3.3)."""
+    """The right hand drawer: Queue (3.4) or Audio/equalizer (3.3).
+
+    The drawer runs from the top bar down to the bottom of the window (the
+    control bar only spans the video column), so its height is H - TOPBAR_H.
+    """
+    dh = H - D.TOPBAR_H
     x = W - D.SIDEBAR_W
-    p = Panel("drawer", x, D.TOPBAR_H, D.SIDEBAR_W,
-              H - D.TOPBAR_H - D.BAR_H,
+    p = Panel("drawer", x, D.TOPBAR_H, D.SIDEBAR_W, dh,
               lefttop="righttop", rightbottom="rightbottom")
-    p.child(Image_("drawer.bg", 0, 0, 0, 0, bitmap="solid.secondary",
+    p.child(Image_("drawer.bg", 0, 0, D.SIDEBAR_W, dh, bitmap="solid.secondary",
                    resize="scale", rightbottom="rightbottom"))
-    p.child(Image_("drawer.edge", 0, 0, 1, 0, bitmap="border.v",
+    p.child(Image_("drawer.edge", 0, 0, 1, dh, bitmap="border.v",
                    resize="scale", rightbottom="rightbottom"))
     for el in drawer_tabs(D.SIDEBAR_W, kind):
         p.child(el)
 
     if kind == "queue":
-        p.child(Playlist("queue.list", 8, D.TAB_H + 12, D.SIDEBAR_W - 16,
-                         H - D.TOPBAR_H - D.BAR_H - D.TAB_H - 100,
+        list_y = D.TAB_H + D.SB_PAD
+        list_h = dh - list_y - 64
+        p.child(Playlist("queue.list", 8, list_y, D.SIDEBAR_W - 16, list_h,
                          fgcolor=D.hexc(D.TEXT_PRIMARY),
                          playcolor=D.hexc(D.ACCENT),
                          bgcolor1=D.hexc(D.BG_SECONDARY),
                          bgcolor2=D.hexc(D.BG_SECONDARY),
                          selcolor=D.hexc(D.BG_HOVER)))
-        fy = H - D.TOPBAR_H - D.BAR_H - 56
+        fy = dh - 44
         for i, (label, action) in enumerate(
-                [("Add", "dialogs.file()"),
+                [("Add", "playlist.add()"),
                  ("Remove", "playlist.del()"),
                  ("Sort", "playlist.sort()")]):
-            bx = D.SB_PAD + i * 100
+            bx = 16 + i * 100
             p.child(Button("queue.%s" % label.lower(),
                            "btn.rect.normal", "btn.rect.down",
                            "btn.rect.over", action, bx, fy))
@@ -672,23 +709,35 @@ def drawer(kind, W, H):
 
 
 def video_area(W, H, right_inset=0):
-    """Background, album art and the video canvas (section 2.1)."""
+    """Background, album art and the video canvas (section 2.1).
+
+    width/height are always explicit: with the DTD defaults an Image keeps
+    its bitmap size (an 8x8 "solid" would stay a tiny square in the corner)
+    and never grows when the window is enlarged.
+    """
     out = []
-    out.append(Image_("bg", 0, 0, 0, 0, bitmap="solid.primary",
+    out.append(Image_("bg", 0, 0, W, H, bitmap="solid.primary",
                       resize="scale", rightbottom="rightbottom"))
     vw = W - right_inset
-    out.append(Image_("art", 0, D.TOPBAR_H, vw, H - D.TOPBAR_H - D.BAR_H,
-                      bitmap="solid.primary", resize="scale2", art="true",
-                      rightbottom="rightbottom"))
-    out.append(Video("video", 0, D.TOPBAR_H, vw, H - D.TOPBAR_H - D.BAR_H,
+    vh = H - D.TOPBAR_H - D.BAR_H
+    out.append(Image_("art", 0, D.TOPBAR_H, vw, vh,
+                      bitmap="video.placeholder", resize="scale2",
+                      art="true", rightbottom="rightbottom"))
+    out.append(Video("video", 0, D.TOPBAR_H, vw, vh,
                      rightbottom="rightbottom", visible="vlc.hasVout"))
     return out
 
 
+def seek_w_for(video_w):
+    return video_w - D.SEEK_X - D.SEEK_RIGHT_GAP
+
+
 def resize_grips(W, H):
     out = []
+    # the east edge runs from the header down to the south-east grip, so it
+    # also works over the right hand drawer
     out.append(Image_("grip.e", W - 6, D.TOPBAR_H, 6,
-                      H - D.TOPBAR_H - D.BAR_H, bitmap="grip.e",
+                      H - D.TOPBAR_H - 6, bitmap="grip.e",
                       resize="scale", action="resizeE",
                       lefttop="righttop", rightbottom="righttop"))
     out.append(Image_("grip.s", 0, H - 6, W - 14, 6, bitmap="grip.s",
@@ -700,7 +749,7 @@ def resize_grips(W, H):
     return out
 
 
-def layout(ident, W, H, seek_w, drawer_kind=None, resizable=True):
+def layout(ident, W, H, drawer_kind=None, resizable=True):
     el = El("Layout", id=ident, width=W, height=H)
     if resizable:
         el.attrs["minwidth"] = D.MIN_W
@@ -714,10 +763,16 @@ def layout(ident, W, H, seek_w, drawer_kind=None, resizable=True):
         el.attrs["maxheight"] = H
 
     inset = D.SIDEBAR_W if drawer_kind else 0
+    # the drawer does NOT widen the window: it takes its 320px out of the video
+    # column, and every layout keeps the same original size so that skins2
+    # treats them as one window (GenericLayout::isTightlyCoupledWith) and the
+    # window keeps the size the user gave it when the drawer opens.
     for c in video_area(W, H, inset):
         el.child(c)
     # the control bar spans the video area, not the drawer
-    el.child(control_bar(W - inset, H, seek_w, ident))
+    el.child(control_bar(W - inset, H, seek_w_for(W - inset), ident,
+                         "seek.strip" if not drawer_kind
+                         else "seek.strip.drawer"))
     if drawer_kind:
         el.child(drawer(drawer_kind, W, H))
     el.child(top_bar(W))
@@ -737,7 +792,8 @@ def mini_window(seek_w):
                    rightbottom="rightbottom", action="move"))
     l.child(Video("mini.video", 0, 0, D.MINI_W, D.MINI_VIDEO_H,
                   visible="vlc.hasVout"))
-    cy = D.MINI_VIDEO_H + 28
+    # the title sits on its own line under the video, the transport below it
+    cy = D.MINI_H - 26           # vertical centre of the button row
     l.child(Button("mini.prev", "btn.prev.normal", "btn.prev.down",
                    "btn.prev.over", "playlist.previous()", 16, cy - 16))
     l.child(Checkbox("mini.play",
@@ -757,7 +813,7 @@ def mini_window(seek_w):
                    D.MINI_W - 40, cy - 16,
                    lefttop="righttop", rightbottom="righttop",
                    tooltiptext="Close mini player"))
-    l.child(Text("mini.title", "$N", 16, D.MINI_VIDEO_H + 4,
+    l.child(Text("mini.title", "$N", 16, D.MINI_VIDEO_H + 6,
                  D.MINI_W - 32, color=D.hexc(D.TEXT_PRIMARY),
                  scrolling="auto", focus="false"))
     w.child(l)
@@ -775,7 +831,7 @@ def fsc_window():
     y1 = cy - D.PREV_SIZE // 2
     l.child(Image_("fsc.bg", 0, 0, D.FSC_W, D.FSC_H, bitmap="solid.secondary",
                    resize="scale", rightbottom="rightbottom", action="move"))
-    l.child(Image_("fsc.edge", 0, 0, 0, 1, bitmap="border.h",
+    l.child(Image_("fsc.edge", 0, 0, D.FSC_W, 1, bitmap="border.h",
                    resize="scale", rightbottom="righttop"))
     l.child(Button("fsc.prev", "btn.prev.normal", "btn.prev.down",
                    "btn.prev.over", "playlist.previous()", D.FSC_MARGIN, y1))
@@ -814,7 +870,7 @@ def fsc_window():
                    tooltiptext="Exit fullscreen"))
     l.child(Button("fsc.close", "icons.close.normal", "icons.close.down",
                    "icons.close.over",
-                   "fullscreenController.setLayout(fsc)",
+                   "fullscreenController.hide()",
                    D.FSC_CLOSE_X, y1, tooltiptext="Hide controls"))
     w.child(l)
     return w
@@ -862,6 +918,11 @@ def main():
     out.append("")
     out.append("  <!-- Artwork: generated by tools/build.py from art.py -->")
     out.append(bm.xml())
+    # skins2 falls back to its own resource-path "defaultfont" when a Text
+    # uses it without a declaration; declare it here so the skin is
+    # self-contained inside the .vlt (and always 12px FreeSans).
+    out.append('  <Font id="defaultfont" file="%s/FreeSans.ttf" size="12"/>'
+               % SKIN_ID)
     for f, size in (("font", 12), ("font.small", 11), ("font.large", 14),
                     ("font.title", 16)):
         out.append('  <Font id="%s" file="%s/FreeSans.ttf" size="%d"/>'
@@ -875,11 +936,11 @@ def main():
     out.append(popup_menu("tracks_menu", D.TRACKS_MENU).render(2))
     out.append("")
     out.append('  <Window id="main" visible="true" x="140" y="90">')
-    out.append(layout("normal", D.MAIN_W, D.MAIN_H, seek_w).render(4))
-    out.append(layout("sidebar_queue", D.SIDE_W, D.SIDE_H, seek_w,
-                      drawer_kind="queue", resizable=False).render(4))
-    out.append(layout("sidebar_audio", D.SIDE_W, D.SIDE_H, seek_w,
-                      drawer_kind="audio", resizable=False).render(4))
+    out.append(layout("normal", D.MAIN_W, D.MAIN_H).render(4))
+    out.append(layout("sidebar_queue", D.MAIN_W, D.MAIN_H,
+                      drawer_kind="queue").render(4))
+    out.append(layout("sidebar_audio", D.MAIN_W, D.MAIN_H,
+                      drawer_kind="audio").render(4))
     out.append("  </Window>")
     out.append(mini_window(seek_w).render(2))
     out.append(fsc_window().render(2))

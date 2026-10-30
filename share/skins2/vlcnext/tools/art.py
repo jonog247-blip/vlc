@@ -39,9 +39,21 @@ def S(v):
     return v * SUPERSAMPLE
 
 
+def box_ss(box):
+    """Map an inclusive (x0, y0, x1, y1) pixel box onto supersampled pixels.
+
+    The far edges must be expanded by one full pixel before scaling: a shape
+    drawn from 0 to S(x1) stops one real pixel short of the canvas, which
+    leaves a semi-transparent 1px rim on every bitmap drawn at the edge (and
+    a translucent frame once such a bitmap is stretched as a background).
+    """
+    x0, y0, x1, y1 = box
+    return [S(x0), S(y0), S(x1 + 1) - 1, S(y1 + 1) - 1]
+
+
 def rrect(d, box, radius, fill=None, outline=None, width=1):
     """Rounded rectangle; box is (x0, y0, x1, y1) in real (unscaled) pixels."""
-    x0, y0, x1, y1 = [S(v) for v in box]
+    x0, y0, x1, y1 = box_ss(box)
     r = S(radius)
     if fill is not None:
         d.rounded_rectangle([x0, y0, x1, y1], radius=r, fill=fill)
@@ -60,7 +72,7 @@ def poly(d, pts, color):
 
 
 def ellipse(d, box, fill=None, outline=None, width=1):
-    x0, y0, x1, y1 = [S(v) for v in box]
+    x0, y0, x1, y1 = box_ss(box)
     if fill is not None:
         d.ellipse([x0, y0, x1, y1], fill=fill)
     if outline is not None:
@@ -279,11 +291,13 @@ def g_menu(d, cx, cy, s, c):
 
 
 def g_folder(d, cx, cy, s, c):
-    w, h = s * 0.80, s * 0.58
-    x0, y0 = cx - w / 2, cy - h / 2 + s * 0.10
-    rrect(d, (x0, y0 + s * 0.10, x0 + w * 0.42, y0 + s * 0.22), s * 0.05,
+    """An outlined folder: a filled shape collapses into a blob at 18px."""
+    w, h = s * 0.84, s * 0.58
+    x0, y0 = cx - w / 2, cy - h / 2 + s * 0.04
+    rrect(d, (x0, y0 - s * 0.12, x0 + w * 0.46, y0 + s * 0.04), s * 0.04,
           fill=c)
-    rrect(d, (x0, y0 + s * 0.14, x0 + w, y0 + h), s * 0.08, fill=c)
+    rrect(d, (x0, y0, x0 + w, y0 + h), s * 0.07, outline=c,
+          width=max(1.0, s * 0.09))
 
 
 def g_win_min(d, cx, cy, s, c):
@@ -450,11 +464,20 @@ def transport_cell(size, glyph, state):
 # ---------------------------------------------------------------------------
 
 def solid(w, h, color, radius=0, border=None):
+    """A flat colour tile.
+
+    With radius 0 the tile must be opaque right up to its last pixel: it is
+    used (stretched) as the background of panels, and any translucent rim
+    would show up as a see-through edge on the window.
+    """
     img = canvas(w, h)
     d = ImageDraw.Draw(img)
-    rrect(d, (0, 0, w - 1, h - 1), radius, fill=color)
-    if border:
-        rrect(d, (0, 0, w - 1, h - 1), radius, outline=border, width=1)
+    if radius <= 0 and border is None:
+        d.rectangle([0, 0, S(w) - 1, S(h) - 1], fill=color)
+    else:
+        rrect(d, (0, 0, w - 1, h - 1), radius, fill=color)
+        if border:
+            rrect(d, (0, 0, w - 1, h - 1), radius, outline=border, width=1)
     return finish(img, w, h)
 
 

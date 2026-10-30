@@ -86,6 +86,8 @@ class Node(object):
         self.parent = parent
         self.children = []
         self.local = None           # rect relative to the parent control
+        self.box = None             # parent rect as recorded at design size
+        self.anchors = ("lefttop", "lefttop")
 
     @property
     def id(self):
@@ -144,6 +146,26 @@ class Theme(object):
         return root
 
     def _walk(self, el, parent, box):
+        """Resolve children exactly like skins2's Builder::makePosition.
+
+        The theme is always analysed at its natural (design) size, where
+        every anchoring combination resolves to the same rectangle:
+
+            left = parent.left + x, top = parent.top + y,
+            right = left + w - 1,  bottom = top + h - 1
+
+        (Position::getLeft/getTop/getRight/getBottom cancel the anchor
+        offsets to x/y at the design size -- see utils/position.cpp.)  What
+        matters, and what this reproduces, is where w/h come from:
+
+          Image     width/height attributes, else the *bitmap* size
+          Button    the "up" bitmap size
+          Checkbox  the "up1" bitmap size
+          Slider    the Bezier curve's bounding box
+          Text      the width attribute, font height from the font metrics
+          Panel     the width/height attributes (mandatory)
+          Video     the width/height attributes (default 0 => invisible)
+        """
         bx, by, bw, bh = box
         for child in el:
             if child.tag in ("SliderBackground", "MenuItem", "MenuSeparator"):
@@ -151,42 +173,44 @@ class Theme(object):
             a = child.attrib
             x = int(a.get("x", 0))
             y = int(a.get("y", 0))
-            w = int(a.get("width", -1))
-            h = int(a.get("height", -1))
-            # At natural size skins2 resolves left/top to x/y for every
-            # anchoring mode (see Builder::makePosition + Position::getLeft).
-            # A width/height of 0 means "stretch to the parent's far edge".
-            if child.tag == "Image" and (w <= 0 or h <= 0):
+            w = int(a.get("width", 0))
+            h = int(a.get("height", 0))
+            if child.tag == "Image":
                 bw_, bh_ = self.bitmap_size(a.get("image"))
                 if w <= 0:
-                    w = bw_ if w == -1 else (bw - x)
+                    w = bw_
                 if h <= 0:
-                    h = bh_ if h == -1 else (bh - y)
-            elif child.tag in ("Button", "Checkbox"):
-                key = "up" if child.tag == "Button" else "up1"
-                w, h = self.bitmap_size(a.get(key))
+                    h = bh_
+            elif child.tag == "Button":
+                w, h = self.bitmap_size(a.get("up"))
+            elif child.tag == "Checkbox":
+                w, h = self.bitmap_size(a.get("up1"))
             elif child.tag == "Slider":
+                # Bezier::getWidth()/getHeight(): highest coordinate + 1
                 pts = parse_points(a.get("points"))
                 w = max(p[0] for p in pts) + 1 if pts else 0
                 h = max(p[1] for p in pts) + 1 if pts else 0
             elif child.tag == "Text":
-                if w <= 0:
-                    w = bw - x
-                h = self.fonts.get(a.get("font"), ("", 12))[1] + 4
-            elif child.tag == "Video":
-                w = w if w > 0 else bw
-                h = h if h > 0 else bh
-            else:
-                if w <= 0:
-                    w = bw - x
-                if h <= 0:
-                    h = bh - y
+                h = self.font_height(a.get("font"))
 
             node = Node(child.tag, a, (bx + x, by + y, w, h), parent)
             node.local = (x, y, w, h)
+            node.box = box
+            node.anchors = (a.get("lefttop", "lefttop"),
+                            a.get("rightbottom", "lefttop"))
             parent.children.append(node)
             if child.tag in ("Panel", "Group"):
                 self._walk(child, node, (node.rect[0], node.rect[1], w, h))
+
+    def font_height(self, ident):
+        """Height skins2 gives a Text control: FT2Font's line height.
+
+        FT2Font::init reports face->size->metrics.height >> 6 px, which for
+        FreeSans is the em size plus its line gap; 2px is a good stand-in.
+        """
+        size = self.fonts.get(ident, ("", 12) if ident != "defaultfont"
+                              else ("", 12))[1]
+        return size + 2
 
     def bitmap_size(self, ident):
         info = self.bitmaps.get(ident)
@@ -425,6 +449,68 @@ def check_geometry(theme, report):
                                                      ra, rb))
 
 
+def check_resize(theme, report):
+    """Every resizable layout must still hold together after a resize.
+
+    skins2 re-runs Position for every control when the window grows, so a
+    control anchored to the wrong corner drifts, collides with its neighbour or
+    slides under the drawer.  Nothing about the XML *looks* wrong at the design
+    size, which is exactly why this has to be tested at another size.
+    """
+    checked = 0
+    for wid, wattr, layouts in theme.windows:
+        for l in layouts:
+            LW, LH = int(l.attrs["width"]), int(l.attrs["height"])
+            if l.attrs.get("maxwidth") == l.attrs.get("minwidth"):
+                continue                       # fixed size window
+            lid = l.attrs["id"]
+            design = {}
+            for n in walk(l):
+                if n is not l:
+                    design.setdefault(n.id, n.rect)
+            NW, NH = LW + RESIZE[0], LH + RESIZE[1]
+            relayout(l, (0, 0, NW, NH))
+            nodes = list(walk(l))[1:]
+
+            for n in nodes:
+                x, y, w, h = n.rect
+                if x < -2 or y < -2 or x + w > NW + 2 or y + h > NH + 2:
+                    report.error("layout %s resized: %s %s leaves the window "
+                                 "(rect %s)" % (lid, n.tag, n.id, n.rect))
+
+            drawers = [n for n in nodes if n.id == "drawer"]
+            if drawers:
+                drawer = drawers[0]
+                dx, dw = drawer.rect[0], drawer.rect[2]
+                if abs(dw - design["drawer"][2]) > 1 or                         abs(dx - (NW - design["drawer"][2])) > 1:
+                    report.error("layout %s resized: drawer is %s, expected "
+                                 "the same %dpx pinned to the right edge"
+                                 % (lid, drawer.rect, design["drawer"][2]))
+                inner = set(id(n) for n in walk(drawer))
+                for n in nodes:
+                    if id(n) in inner or n.tag not in CLICKABLE:
+                        continue
+                    if not overlaps(hit_rect(theme, n), drawer.rect):
+                        continue
+                    report.error("layout %s resized: %s %s runs under the "
+                                 "drawer (rect %s, drawer starts at %d)"
+                                 % (lid, n.tag, n.id, n.rect, dx))
+
+            # a slider anchored on both sides has to absorb the whole delta
+            if "seek" in design:
+                for n in nodes:
+                    if n.id != "seek":
+                        continue
+                    want = design["seek"][2] + RESIZE[0]
+                    if abs(n.rect[2] - want) > 3:
+                        report.error("layout %s resized: seek is %dpx wide, "
+                                     "expected %d" % (lid, n.rect[2], want))
+            relayout(l, (0, 0, LW, LH))
+            checked += 1
+    report.note("geometry re-checked at +%dx+%d on %d layouts"
+                % (RESIZE[0], RESIZE[1], checked))
+
+
 def walk(node):
     yield node
     for c in node.children:
@@ -488,12 +574,13 @@ def check_artwork(theme, report):
         n = len(px) // 4
         opaque = sum(1 for i in range(3, len(px), 4) if px[i] > 30)
         ink = opaque / float(n) if n else 0.0
-        if ident == "blank":
+        if ident == "blank" or ident.startswith("grip."):
             continue                       # deliberately empty
         if ink < 0.02:
             report.error("artwork %s is empty (%.2f%% ink)" % (ident,
                                                                100 * ink))
         elif ink > 0.995 and ident.startswith(("icons.", "btn.")) \
+                and not ident.startswith(("btn.rect.", "btn.play.", "btn.pause.")) \
                 and not ident.endswith((".down", ".over")):
             report.error("artwork %s is a solid block (%.1f%% ink)"
                          % (ident, 100 * ink))
@@ -532,12 +619,30 @@ STATE = {"vlc.hasVout": True, "vlc.isPlaying": True, "vlc.isStopped": False,
 
 
 def visible(expr, layout_id):
-    if expr is None or expr == "true":
+    """Evaluate a visible= expression the way skins2's interpreter does.
+
+    "not X" is handled first: an expression such as
+    "not sidebar_audio.isActive" also *ends* with ".isActive", so testing
+    the suffix before the negation would silently hide every "not X" text.
+    """
+    if expr is None:
         return True
-    if expr.endswith(".isActive"):
-        return expr.rsplit(".", 1)[0] == layout_id
+    expr = expr.strip()
     if expr.startswith("not "):
         return not visible(expr[4:], layout_id)
+    if expr == "true":
+        return True
+    if expr == "false":
+        return False
+    # state="main.isMaximized()" -- skins2 strips the empty argument list
+    if expr.endswith("()"):
+        expr = expr[:-2]
+    if expr.endswith(".isActive"):
+        return expr.rsplit(".", 1)[0] == layout_id
+    if expr.endswith(".isVisible"):
+        return True
+    if expr.endswith(".isMaximized"):
+        return False
     return STATE.get(expr, True)
 
 
@@ -563,110 +668,259 @@ def frame_of(img, index, nbh):
 def font_for(theme, ident):
     info = theme.fonts.get(ident)
     if not info:
-        return ImageFont.load_default()
+        return ImageFont.truetype(os.path.join(SKIN, "vlcnext", "FreeSans.ttf"),
+                                  12)
     path = os.path.join(SKIN, info[0])
     if not os.path.exists(path):
         return ImageFont.load_default()
     return ImageFont.truetype(path, info[1])
 
 
-def render_layout(theme, wid, layout):
+def curve_point(pts, t):
+    """Point on a skins2 Bezier at t in [0,1] (2-point curves are lines)."""
+    if len(pts) == 2:
+        (x0, y0), (x1, y1) = pts
+        return (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)
+    # Fall back to a polyline through the control points.
+    import math
+    n = len(pts) - 1
+    x = y = 0.0
+    for i, (px, py) in enumerate(pts):
+        b = math.comb(n, i) * (t ** i) * ((1 - t) ** (n - i))
+        x += b * px
+        y += b * py
+    return (x, y)
+
+
+SAMPLE_LIST = ["The.Wand.S01E03.mkv", "The.Wand.S01E04.mkv",
+               "The.Wand.S01E05.mkv"]
+
+# Demo positions for the sliders, so the previews show a realistic mix.
+SLIDER_VALUE = {"seek": 0.25, "volume": 0.425, "fsc.seek": 0.25,
+                "fsc.volume": 0.425, "eq.preamp": 0.5}
+
+
+RESIZE = (320, 180)      # "the user dragged the bottom right corner"
+
+
+def relayout(root, new_rect):
+    """Recompute the tree's rectangles the way skins2's Position does.
+
+    Builder::makePosition stores the control's corners *relative to a corner of
+    the parent box* at parse time, and Position::getLeft()/getRight() add the
+    box's current width back.  Net effect, for a child of a box that grows by
+    dx: left anchored controls stay put, right anchored ones move by dx.
+    Called with the design rect it reproduces the design rectangles (up to the
+    +-1 the engine's inclusive coordinates introduce); called with a bigger
+    rect it says where every control really goes after a window resize.
+    """
+    def one(node, parent_new):
+        lx, ly, lw, lh = node.box
+        nw, nh = parent_new[2], parent_new[3]
+        x, y, w, h = node.local
+        lt, rb = node.anchors
+        left = x if lt.startswith("left") else x - lw + 1
+        right = x + w - 1 if rb.startswith("left") else x + w - lw
+        top = y if lt.endswith("top") else y - lh + 1
+        bottom = y + h - 1 if rb.endswith("top") else y + h - lh
+        gl = parent_new[0] + (left if lt.startswith("left") else nw + left - 1)
+        gr = parent_new[0] + (right if rb.startswith("left")
+                              else nw + right - 1)
+        gt = parent_new[1] + (top if lt.endswith("top") else nh + top - 1)
+        gb = parent_new[1] + (bottom if rb.endswith("top")
+                              else nh + bottom - 1)
+        node.rect = (gl, gt, gr - gl + 1, gb - gt + 1)
+        for c in node.children:
+            one(c, node.rect)
+
+    root.rect = new_rect
+    for c in root.children:
+        one(c, new_rect)
+
+
+def render_layout(theme, wid, layout, resize=(0, 0)):
+    """Composite one layout exactly the way skins2 paints it.
+
+    Every control draws inside its own rectangle (CtrlImage/CtrlText clip
+    themselves to their position), areas nobody paints stay transparent, and
+    the window is shaped from that alpha channel.  So the canvas is RGBA and
+    a preview that leaves holes is *wrong* -- check_render() asserts on it.
+    """
     W = int(layout.attrs["width"])
     H = int(layout.attrs["height"])
-    img = Image.new("RGB", (W, H), (0x12, 0x12, 0x12))
-    d = ImageDraw.Draw(img)
+    if resize != (0, 0):
+        W += resize[0]
+        H += resize[1]
+        relayout(layout, (0, 0, W, H))
+    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     lid = layout.attrs["id"]
 
-    def draw_node(node, ox, oy):
+    def paste(node, tile, clip=True):
+        x, y, w, h = node.rect
+        if clip and tile.size != (max(1, w), max(1, h)):
+            box = Image.new("RGBA", (max(1, w), max(1, h)), (0, 0, 0, 0))
+            box.alpha_composite(tile, (0, 0))
+            tile = box
+        canvas.alpha_composite(tile, (x, y))
+
+    def draw_image(node):
+        a = node.attrs
+        bmp = load_bitmap(theme, a.get("image"))
+        if bmp is None:
+            return
+        x, y, w, h = node.rect
+        w, h = max(1, w), max(1, h)
+        method = a.get("resize", "mosaic")
+        if method == "scale":
+            # BILINEAR, not LANCZOS: skins2's scaler has no negative lobes,
+            # and LANCZOS ringing on an 8x8 swatch would punch a soft hole
+            # in the window's shape.
+            tile = bmp.resize((w, h), Image.BILINEAR)
+        elif method == "scale2":
+            # CtrlImage::kScaleAndRatioPreserved: fit inside, then centre.
+            sw = int(h * bmp.width / bmp.height)
+            sh = int(w * bmp.height / bmp.width)
+            if sw > w:
+                tile = bmp.resize((sw, sh), Image.BILINEAR)
+            else:
+                tile = bmp.resize((w, sh), Image.BILINEAR)
+            pad = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            pad.alpha_composite(tile, ((w - tile.width) // 2,
+                                       (h - tile.height) // 2))
+            tile = pad
+        else:                                    # mosaic (DTD default)
+            tile = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            for ty in range(0, h, bmp.height):
+                for tx in range(0, w, bmp.width):
+                    tile.alpha_composite(bmp, (tx, ty))
+        paste(node, tile)
+
+    def draw_button(node):
+        key = "up" if node.tag == "Button" else "up1"
+        if node.tag == "Checkbox":
+            on = visible(node.attrs.get("state"), lid)
+            key = "up1" if on else "up2"
+        bmp = load_bitmap(theme, node.attrs.get(key))
+        if bmp is not None:
+            paste(node, bmp)
+
+    def draw_text(node):
+        a = node.attrs
+        text = re.sub(r"\$([A-Za-z])",
+                      lambda m: SAMPLE.get(m.group(1), m.group(0)),
+                      a.get("text", ""))
+        fnt = font_for(theme, a.get("font", "defaultfont"))
+        x, y, w, h = node.rect
+        tile = Image.new("RGBA", (max(1, w), max(1, h)), (0, 0, 0, 0))
+        d = ImageDraw.Draw(tile)
+        tw = d.textlength(text, font=fnt)
+        align = a.get("alignment", "left")
+        if align == "center":
+            tx = (w - tw) / 2
+        elif align == "right":
+            tx = w - tw
+        else:
+            tx = 0
+        d.text((tx, 0), text, font=fnt, fill=a.get("color", "#FFFFFF"))
+        paste(node, tile)
+
+    def draw_slider(node):
         a = node.attrs
         x, y, w, h = node.rect
-        x -= ox
-        y -= oy
-        if not visible(a.get("visible"), lid):
+        pts = parse_points(a.get("points"))
+        if not pts:
+            return
+        cw = max(p[0] for p in pts) + 1
+        ch = max(p[1] for p in pts) + 1
+        value = SLIDER_VALUE.get(node.id, 0.5)
+        bg = None
+        for c in getattr(node, "raw_children", []):
+            if c.tag == "SliderBackground":
+                bg = c.attrib
+        if bg:
+            bmp = load_bitmap(theme, bg["image"])
+            if bmp:
+                nbh = int(bg.get("nbhoriz", 1))
+                nbv = int(bg.get("nbvert", 1))
+                idx = int(round(value * (nbh * nbv - 1)))
+                frame = frame_of(bmp, idx % nbh, nbh)
+                # CtrlSliderBg scales the frame by the control/curve ratio,
+                # so the visible track keeps the strip's own thickness and
+                # may be taller than the (thin) Bezier box.
+                fw = max(1, int(round(frame.width * w / float(cw))))
+                fh = max(1, int(round(frame.height * h / float(ch))))
+                frame = frame.resize((fw, fh), Image.BILINEAR)
+                canvas.alpha_composite(frame, (x, y))
+        cur = load_bitmap(theme, a.get("up"))
+        if cur:
+            px, py = curve_point(pts, value)
+            # CtrlSliderCursor maps the curve onto the control box (resizable
+            # sliders stretch), and deliberately draws outside that box.
+            px *= w / float(cw)
+            py *= h / float(ch)
+            cx = int(x + px - cur.width / 2)
+            cy = int(y + py - cur.height / 2)
+            canvas.alpha_composite(cur, (cx, cy))
+
+    def draw_playlist(node):
+        a = node.attrs
+        x, y, w, h = node.rect
+        tile = Image.new("RGBA", (max(1, w), max(1, h)), (0, 0, 0, 0))
+        d = ImageDraw.Draw(tile)
+        d.rectangle([0, 0, w - 1, h - 1], fill=a.get("bgcolor1", "#1A1A1A"))
+        fnt = font_for(theme, a.get("font", "defaultfont"))
+        for i, name in enumerate(SAMPLE_LIST):
+            ry = 6 + i * 22
+            if ry + 18 > h:
+                break
+            if i == 1:
+                d.rectangle([0, ry - 3, w - 1, ry + 15],
+                            fill=a.get("selcolor", "#2F2F2F"))
+            d.text((8, ry), "%d. %s" % (i + 1, name), font=fnt,
+                   fill=a.get("playcolor" if i == 1 else "fgcolor",
+                              "#FFFFFF"))
+        paste(node, tile)
+
+    def draw_video(node):
+        x, y, w, h = node.rect
+        tile = Image.new("RGBA", (max(1, w), max(1, h)), (0, 0, 0, 0))
+        d = ImageDraw.Draw(tile)
+        # A real vout paints here; the preview shows the letterbox canvas.
+        d.rectangle([0, 0, w - 1, h - 1], fill=(0x0A, 0x0A, 0x0A))
+        paste(node, tile)
+
+    def draw_node(node):
+        if not visible(node.attrs.get("visible"), lid):
             return
         if node.tag == "Image":
-            bmp = load_bitmap(theme, a.get("image"))
-            if bmp is None:
-                return
-            if a.get("resize") == "scale" and (bmp.width != w or
-                                               bmp.height != h):
-                bmp = bmp.resize((max(1, w), max(1, h)), Image.LANCZOS)
-            img.paste(bmp, (x, y), bmp)
-        elif node.tag == "Button":
-            bmp = load_bitmap(theme, a.get("up"))
-            if bmp:
-                img.paste(bmp, (x, y), bmp)
-        elif node.tag == "Checkbox":
-            state = a.get("state", "true")
-            on = visible(state, lid)
-            key = "up1" if on else "up2"
-            bmp = load_bitmap(theme, a.get(key))
-            if bmp:
-                img.paste(bmp, (x, y), bmp)
+            draw_image(node)
+        elif node.tag in ("Button", "Checkbox"):
+            draw_button(node)
         elif node.tag == "Text":
-            text = a.get("text", "")
-            text = re.sub(r"\$([A-Za-z])",
-                          lambda m: SAMPLE.get(m.group(1), m.group(0)), text)
-            fnt = font_for(theme, a.get("font", "defaultfont"))
-            color = a.get("color", "#FFFFFF")
-            tw = d.textlength(text, font=fnt)
-            align = a.get("alignment", "left")
-            if align == "center":
-                tx = x + (w - tw) / 2
-            elif align == "right":
-                tx = x + w - tw
-            else:
-                tx = x
-            d.text((tx, y), text, font=fnt, fill=color)
+            draw_text(node)
         elif node.tag == "Slider":
-            bg = None
-            for c in node.raw_children:
-                if c.tag == "SliderBackground":
-                    bg = c.attrib
-            if bg:
-                bmp = load_bitmap(theme, bg["image"])
-                if bmp:
-                    nbh = int(bg.get("nbhoriz", 1))
-                    idx = int(round(0.42 * (nbh - 1)))
-                    frame = frame_of(bmp, idx, nbh)
-                    frame = frame.resize((w, frame.height), Image.LANCZOS)
-                    img.paste(frame, (x, y), frame)
-            cur = load_bitmap(theme, a.get("up"))
-            if cur:
-                pts = parse_points(a.get("points"))
-                if pts:
-                    (x0, y0), (x1, y1) = pts[0], pts[-1]
-                    px = x + x0 + (x1 - x0) * 0.42
-                    py = y + y0 + (y1 - y0) * 0.42
-                    img.paste(cur, (int(px - cur.width / 2),
-                                    int(py - cur.height / 2)), cur)
-        elif node.tag == "Video":
-            for i in range(h):
-                v = 0x1A + int(0x10 * (1 - i / float(max(1, h))))
-                d.line([(x, y + i), (x + w, y + i)],
-                       fill=(v, v, v))
-            label = "VIDEO"
-            d.text((x + w / 2 - 18, y + h / 2 - 6), label,
-                   fill=(0x55, 0x55, 0x55))
+            draw_slider(node)
         elif node.tag == "Playlist":
-            d.rectangle([x, y, x + w, y + h], fill=(0x1A, 0x1A, 0x1A))
-            fnt = font_for(theme, a.get("font", "defaultfont"))
-            for i, name in enumerate(["The.Wand.S01E03.mkv",
-                                      "The.Wand.S01E04.mkv",
-                                      "The.Wand.S01E05.mkv"]):
-                ry = y + 6 + i * 22
-                col = (0xE0, 0x7A, 0x1E) if i == 1 else (0xFF, 0xFF, 0xFF)
-                if i == 1:
-                    d.rectangle([x, ry - 3, x + w, ry + 17],
-                                fill=(0x2F, 0x2F, 0x2F))
-                d.text((x + 8, ry), "%d. %s" % (i + 1, name), font=fnt,
-                       fill=col)
+            draw_playlist(node)
+        elif node.tag in ("Video", "Playtree"):
+            draw_video(node)
         for c in node.children:
-            draw_node(c, ox, oy)
+            draw_node(c)
 
     for c in layout.children:
-        draw_node(c, 0, 0)
-    return img
+        draw_node(c)
+    return canvas
+
+
+def preview_on_desktop(img, backdrop=(0x2A, 0x44, 0x60)):
+    """Composite a rendered layout over a coloured "desktop" for review.
+
+    Anything that stays visible in the backdrop colour means the skin does
+    not paint there: in VLC that area is simply a hole in the window.
+    """
+    bg = Image.new("RGB", img.size, backdrop)
+    bg.paste(img, (0, 0), img)
+    return bg
 
 
 def contact_sheet(theme):
@@ -675,7 +929,8 @@ def contact_sheet(theme):
     for wid, wattr, layouts in theme.windows:
         for l in layouts:
             img = render_layout(theme, wid, l)
-            tiles.append(("%s / %s" % (wid, l.attrs["id"]), img))
+            tiles.append(("%s / %s" % (wid, l.attrs["id"]),
+                          preview_on_desktop(img)))
     pad = 24
     label_h = 26
     scale = 0.62
@@ -707,6 +962,9 @@ def contact_sheet(theme):
     return path
 
 
+RENDERS = {}
+
+
 def render_all(theme):
     if not os.path.isdir(PREVIEW_DIR):
         os.makedirs(PREVIEW_DIR)
@@ -716,8 +974,19 @@ def render_all(theme):
             img = render_layout(theme, wid, l)
             path = os.path.join(PREVIEW_DIR, "%s_%s.png"
                                 % (wid, l.attrs["id"]))
-            img.save(path)
+            preview_on_desktop(img).save(path)
+            RENDERS["%s/%s" % (wid, l.attrs["id"])] = img
             out.append(path)
+            # one "the user dragged the corner" render per resizable layout
+            if wid == "main":
+                big = render_layout(theme, wid, l, resize=RESIZE)
+                relayout(l, (0, 0, int(l.attrs["width"]),
+                             int(l.attrs["height"])))
+                path = os.path.join(PREVIEW_DIR, "%s_%s_wide.png"
+                                    % (wid, l.attrs["id"]))
+                preview_on_desktop(big).save(path)
+                RENDERS["%s/%s+resize" % (wid, l.attrs["id"])] = big
+                out.append(path)
     return out
 
 
@@ -755,6 +1024,20 @@ def check_render(theme, report):
     W, H = D.MAIN_W, D.MAIN_H
     bar_y = H - D.BAR_H
 
+    # 0. The window must be *opaque everywhere*.  skins2 shapes the window
+    #    from the alpha channel it painted: any pixel nobody painted is a
+    #    hole through to the desktop.  This is what catches an <Image> that
+    #    was given no width/height (skins2 then uses the bitmap's own size,
+    #    e.g. an 8x8 "solid" swatch in the top left corner).
+    for name, img in sorted(RENDERS.items()):
+        hist = img.getchannel("A").histogram()
+        holes = sum(hist[:200])
+        if holes:
+            report.error("render: %s has %d unpainted pixel(s) -- the "
+                         "window would show through to the desktop"
+                         % (name, holes))
+    report.note("render: opacity checked on %d layouts" % len(RENDERS))
+
     checks = [
         ("top bar uses the secondary surface",
          pixel_is(normal, 550, 12, D.BG_SECONDARY)),
@@ -770,10 +1053,11 @@ def check_render(theme, report):
          pixel_is(normal, D.SEEK_X + 120, bar_y + D.ROW1_CY, D.ACCENT)),
         ("seek bar is unfilled after the playhead",
          pixel_is(normal, D.SEEK_X + 600, bar_y + D.ROW1_CY, D.BG_SURFACE)),
-        ("seek bar shows a handle",
-         region_has(normal, (D.SEEK_X + 260, bar_y + D.ROW1_CY - 7,
-                             D.SEEK_X + 340, bar_y + D.ROW1_CY + 7),
-                    D.TEXT_PRIMARY)),
+        ("seek bar shows a handle at the playhead",
+         region_has(normal, (int(D.SEEK_X + 733 * SLIDER_VALUE["seek"]) - 9,
+                             bar_y + D.ROW1_CY - 8,
+                             int(D.SEEK_X + 733 * SLIDER_VALUE["seek"]) + 9,
+                             bar_y + D.ROW1_CY + 8), D.TEXT_PRIMARY)),
         ("cone volume is green under 100%",
          region_has(normal, (W - D.VOL_SLIDER_D, bar_y + D.ROW2_CY - 8,
                              W - D.VOL_SLIDER_D + 60,
@@ -783,6 +1067,20 @@ def check_render(theme, report):
                   D.BG_SURFACE)),
         ("window controls sit in the top right",
          region_has(normal, (W - 60, 0, W - 20, D.TOPBAR_H), D.ICON)),
+        ("the media title is drawn in the top bar",
+         region_has(normal, (D.CRUMB_X + D.BTN, 10, D.CRUMB_X + 300, 30),
+                    D.TEXT_SECOND)),
+        ("the title row is drawn in the control bar",
+         region_has(normal, (D.TRANSPORT_X, bar_y + D.ROW2_CY - 10,
+                             D.TRANSPORT_X + 200, bar_y + D.ROW2_CY + 6),
+                    D.TEXT_PRIMARY)),
+        ("the elapsed time is drawn next to the transport",
+         region_has(normal, (D.NEXT_X + D.NEXT_SIZE + 18,
+                             bar_y + D.ROW1_CY - 8,
+                             D.NEXT_X + D.NEXT_SIZE + 90,
+                             bar_y + D.ROW1_CY + 8), D.TEXT_PRIMARY)),
+        ("the bar is separated from the video by a 1px border",
+         pixel_is(normal, 550, bar_y, D.BORDER)),
     ]
     for name, ok in checks:
         if not ok:
@@ -792,14 +1090,28 @@ def check_render(theme, report):
     for name, kind in (("main_sidebar_queue.png", "queue"),
                        ("main_sidebar_audio.png", "audio")):
         img = Image.open(os.path.join(PREVIEW_DIR, name))
-        if not pixel_is(img, D.MAIN_W + 160, D.TOPBAR_H + 200,
-                        D.BG_SECONDARY):
+        dx = D.MAIN_W - D.SIDEBAR_W          # the drawer eats into the window
+        if not pixel_is(img, dx + 160, D.TOPBAR_H + 200, D.BG_SECONDARY):
             report.error("render: %s has no drawer surface at x=%d"
-                         % (name, D.MAIN_W + 160))
-        if not pixel_is(img, D.MAIN_W, D.TOPBAR_H + 200, D.BORDER):
+                         % (name, dx + 160))
+        if not pixel_is(img, dx, D.TOPBAR_H + 200, D.BORDER):
             report.error("render: %s is missing the drawer border" % name)
+        # the drawer must not cover the control bar: the bar's top edge and
+        # its surface both stop at the drawer
+        if not pixel_is(img, dx - 40, D.MAIN_H - D.BAR_H, D.BORDER):
+            report.error("render: %s: the control bar does not end at the "
+                         "drawer" % name)
+        if not pixel_is(img, dx - 40, D.MAIN_H - D.BAR_H + D.ROW2_CY,
+                        D.BG_PRIMARY):
+            report.error("render: %s: the control bar surface is missing "
+                         "next to the drawer" % name)
+        # both tab labels always exist: the inactive one in grey
+        if not region_has(img, (dx + 8, D.TAB_H - 4,
+                                dx + D.TAB_W * 2 + 8, D.TAB_H + 12),
+                          (0x88, 0x88, 0x88), tol=20):
+            report.error("render: %s has no inactive tab label" % name)
     report.note("render: %d pixel assertions on %d layouts"
-                % (len(checks) + 4, 3))
+                % (len(checks) + 6, 3))
 
 
 # ---------------------------------------------------------------------------
@@ -836,6 +1148,7 @@ def main():
     check_ids(theme, report)
     check_macros(theme, report)
     check_geometry(theme, report)
+    check_resize(theme, report)
 
     if "--check" not in sys.argv:
         for p in render_all(theme):
