@@ -68,6 +68,9 @@ reached from a `.vlt` file:
   library in skins2, so it opens VLC's playlist instead.
 * Elapsed ⇄ remaining time toggle on click (`§2.3`) — `$T` / `$D` are fixed
   macros and no command switches them; both are shown at once instead.
+* The centre title of the header (`§2.2`) — skins2 has no way to ellipsize or
+  centre a string over a variable width, and the media name is already the
+  breadcrumb, so that slot carries the bitrate / sample-rate readout.
 * Subtitle sync panel (delay / speed / duration sliders) — skins2 has no
   subtitle variables; only `time`, `volume` and the equalizer are exposed.
 * Subtitle appearance settings and per-show presets.
